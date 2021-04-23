@@ -2,5 +2,6 @@ export enum SceneId {
     LoaderScene = "LoaderScene",
     GameScene = "GameScene",
     MenuScene = "MenuScene",
-    UpgradeScene = "UpgradeScene"
+    UpgradeScene = "UpgradeScene",
+    GameUIScene = "GameUIScene",
 }
