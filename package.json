@@ -22,6 +22,8 @@
     "lodash": "^4.17.20",
     "lz-string": "^1.4.4",
     "phaser": "^3.54.0",
+    "phaser3-rex-plugins": "^1.1.45",
+    "phaser3-rex-plugins-types": "^0.1.3",
     "random-js": "^2.1.0",
     "reflect-metadata": "^0.1.13"
   },

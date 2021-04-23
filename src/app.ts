@@ -7,6 +7,8 @@ import { DataManager } from './nerdEngine/managers/dataManager';
 import { SaveMaker } from './nerdEngine/managers/saveSystem/saveMaker';
 import { LoadManager } from './nerdEngine/managers/saveSystem/loadManager';
 import { LoadedContentFixer } from './nerdEngine/managers/saveSystem/loadedContentFixer';
+// @ts-ignore
+import RexUIPlugin from 'phaser3-rex-plugins/templates/ui/ui-plugin.js';
 
 export let NerdEngine: nerdEngine;
 export let PhaserEngine: GameEngine;
@@ -48,6 +50,16 @@ const config: Phaser.Types.Core.GameConfig = {
             customUpdate: false,
         },
     },
+
+    plugins: {
+        scene: [{
+            key: 'rexUI',
+            plugin: RexUIPlugin,
+            mapping: 'rexUI'
+        },
+        // ...
+        ]
+    }
 };
 
 export class GameEngine extends Phaser.Game {
