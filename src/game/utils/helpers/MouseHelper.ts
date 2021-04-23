@@ -1,4 +1,3 @@
-import { Scene } from "phaser";
 import Vector2 = Phaser.Math.Vector2;
 import Camera = Phaser.Cameras.Scene2D.Camera;
 

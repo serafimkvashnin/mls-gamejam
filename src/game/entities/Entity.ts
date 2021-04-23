@@ -1,6 +1,3 @@
-import GameObject = Phaser.GameObjects.GameObject;
-import {Player} from "./creatures/player/Player";
-import { Scene } from "phaser";
 import { GameScene } from "../scenes/GameScene";
 
 export class Entity extends Phaser.Physics.Arcade.Image {

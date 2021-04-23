@@ -26,12 +26,11 @@ export enum ClassNames {
     GameFloat = "GameFloat",
 }
 
-export interface IGameObject extends ISerializable<IGameObject> /*<ClassType extends string = string, Type extends IStorageItem>*/ {
+export interface IGameObject extends ISerializable<IGameObject>, IUpdate /*<ClassType extends string = string, Type extends IStorageItem>*/ {
     readonly ClassID: ClassNames | string;
     readonly ID: string;
 
     IsSameSignature<T extends IGameObject>(object: T): boolean;
-    Update(dt: Time): void;
 }
 
 export abstract class GameObject

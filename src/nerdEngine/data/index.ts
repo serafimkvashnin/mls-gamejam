@@ -1,5 +1,6 @@
 export * from "./time";
 export * from "./float";
+export * from "./gameFloat";
 export * from "./gameData";
 export * from "./condition";
 export * from "./vector2";

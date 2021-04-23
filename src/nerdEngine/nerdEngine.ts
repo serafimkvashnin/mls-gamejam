@@ -1,5 +1,5 @@
 import { Engine, MersenneTwister19937, Random } from "random-js";
-import { ISaveMaker, LoadedContentFixer, LoadManager, StopWatchManager } from "./managers";
+import { ISaveMaker, LoadedContentFixer, LoadManager} from "./managers";
 import { Wallet } from "./logic/wallet";
 import {
     Container,
@@ -19,11 +19,10 @@ import { CustomPrice, Price, PriceArray } from "./logic/price";
 import { GameEvent } from "./components";
 import { ContentModule } from "./content";
 import { IUpdate } from "./interfaces";
-import { SystemManager } from "./managers/systemManager";
+import { SystemManager } from "./managers";
 import { IDataManager } from "./interfaces/IDataManager";
 import { SaveManager } from "./managers/saveSystem";
 import { Exclude } from "class-transformer";
-import { LogColored } from "./utils/utilsText";
 
 // export interface IEngineComponent {
 //     Create(engine: nerdEngine/*, ...args: any[]*/): this;

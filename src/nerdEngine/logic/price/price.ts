@@ -1,6 +1,6 @@
 import { Wallet, WalletValue } from "../wallet";
 import { ClassNames, GameObject, IGameObject } from "../gameObject";
-import { Float, RawFloat, Time } from "../../data";
+import { Float, RawFloat} from "../../data";
 import { ValueCalc } from "../../math";
 import { Exclude, Type } from "class-transformer";
 import { nerdEngine } from "../../nerdEngine";

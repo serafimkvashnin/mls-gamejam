@@ -1,6 +1,6 @@
 import LoaderPlugin = Phaser.Loader.LoaderPlugin;
-import FilterMode = Phaser.Textures.FilterMode;
-import { Resource, SoundType, TextureType } from "./Resource";
+
+import { Resource, SoundType} from "./Resource";
 
 export class SoundResource extends Resource {
     constructor(id: string, path: string) {

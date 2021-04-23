@@ -2,8 +2,7 @@
  * Default SaveMaker class, that uses browser's LocalStorage
  */
  import { ISaveMaker } from "./ISaveMaker";
- import { SaveManager } from "./saveManager";
- import { nerdEngine } from "../../nerdEngine";
+import { nerdEngine } from "../../nerdEngine";
  
  export class SaveMaker implements ISaveMaker {
      constructor(public readonly Engine: nerdEngine) {
