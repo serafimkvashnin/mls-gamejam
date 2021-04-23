@@ -1,0 +1,50 @@
+{ "frames": [
+   {
+    "filename": "0",
+    "frame": { "x": 0, "y": 0, "w": 14, "h": 20 },
+    "rotated": false,
+    "trimmed": true,
+    "spriteSourceSize": { "x": 1, "y": 0, "w": 14, "h": 20 },
+    "sourceSize": { "w": 16, "h": 20 },
+    "duration": 150
+   },
+   {
+    "filename": "1",
+    "frame": { "x": 14, "y": 0, "w": 14, "h": 19 },
+    "rotated": false,
+    "trimmed": true,
+    "spriteSourceSize": { "x": 1, "y": 1, "w": 14, "h": 19 },
+    "sourceSize": { "w": 16, "h": 20 },
+    "duration": 150
+   },
+   {
+    "filename": "2",
+    "frame": { "x": 28, "y": 0, "w": 14, "h": 18 },
+    "rotated": false,
+    "trimmed": true,
+    "spriteSourceSize": { "x": 1, "y": 2, "w": 14, "h": 18 },
+    "sourceSize": { "w": 16, "h": 20 },
+    "duration": 150
+   },
+   {
+    "filename": "3",
+    "frame": { "x": 42, "y": 0, "w": 14, "h": 19 },
+    "rotated": false,
+    "trimmed": true,
+    "spriteSourceSize": { "x": 1, "y": 1, "w": 14, "h": 19 },
+    "sourceSize": { "w": 16, "h": 20 },
+    "duration": 150
+   }
+ ],
+ "meta": {
+  "app": "http://www.aseprite.org/",
+  "version": "1.2.21-dev",
+  "image": "enemy.png",
+  "format": "RGBA8888",
+  "size": { "w": 56, "h": 20 },
+  "scale": "1",
+  "frameTags": [
+   { "name": "Enemy Idle", "from": 0, "to": 3, "direction": "forward" }
+  ]
+ }
+}

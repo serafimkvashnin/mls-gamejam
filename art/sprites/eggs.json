@@ -1,0 +1,41 @@
+{ "frames": [
+   {
+    "filename": "eggs 0.aseprite",
+    "frame": { "x": 0, "y": 0, "w": 14, "h": 40 },
+    "rotated": false,
+    "trimmed": true,
+    "spriteSourceSize": { "x": 1, "y": 0, "w": 14, "h": 40 },
+    "sourceSize": { "w": 16, "h": 40 },
+    "duration": 150
+   },
+   {
+    "filename": "eggs 1.aseprite",
+    "frame": { "x": 14, "y": 0, "w": 14, "h": 39 },
+    "rotated": false,
+    "trimmed": true,
+    "spriteSourceSize": { "x": 1, "y": 1, "w": 14, "h": 39 },
+    "sourceSize": { "w": 16, "h": 40 },
+    "duration": 150
+   },
+   {
+    "filename": "eggs 2.aseprite",
+    "frame": { "x": 0, "y": 40, "w": 14, "h": 38 },
+    "rotated": false,
+    "trimmed": true,
+    "spriteSourceSize": { "x": 1, "y": 2, "w": 14, "h": 38 },
+    "sourceSize": { "w": 16, "h": 40 },
+    "duration": 150
+   }
+ ],
+ "meta": {
+  "app": "http://www.aseprite.org/",
+  "version": "1.2.9-x64",
+  "image": "E:\\Projects\\Programming\\TypeScript\\Phaser\\Convoy-Idle\\assets\\sprites\\creatures\\eggs.png",
+  "format": "RGBA8888",
+  "size": { "w": 32, "h": 128 },
+  "scale": "1",
+  "frameTags": [
+   { "name": "Idle", "from": 0, "to": 2, "direction": "pingpong" }
+  ]
+ }
+}

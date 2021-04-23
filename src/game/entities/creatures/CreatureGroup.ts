@@ -1,0 +1,22 @@
+import { Scene } from "phaser";
+import { GameEvent } from "../../../nerdEngine";
+import { Entity } from "../Entity";
+import { EntityGroup } from "../EntityGroup";
+import { Creature } from "./Creature";
+
+export class CreatureGroup extends Phaser.GameObjects.Group {
+    public readonly onAnyoneDeath: GameEvent<Creature, { from: Creature | Entity }>;
+
+    public constructor(scene: Scene) {
+        super(scene);
+
+        this.onAnyoneDeath = new GameEvent();
+    }
+
+    public sortY(): void {
+        this.children.entries.slice().forEach(child => {
+            const sprite = child as Phaser.GameObjects.Sprite | Phaser.GameObjects.Image;
+            sprite.depth = child.body.position.y;
+        });
+    }
+}
