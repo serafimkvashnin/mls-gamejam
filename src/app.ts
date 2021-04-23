@@ -9,6 +9,7 @@ import {TestSceneUI} from "./game/scenes/game/TestSceneUI";
 import { nerdEngine } from "./nerdEngine";
 import { GameManager } from "./game/managers/GameManager";
 import { InitEngine } from "./engineSetup";
+import { JamScene } from "./game/scenes/JamScene";
 
 export let NerdEngine: nerdEngine;
 export let PhaserEngine: GameEngine;
@@ -32,6 +33,8 @@ const config: Phaser.Types.Core.GameConfig = {
 
     scene: [
         LoaderScene,
+        JamScene,
+
         TestScene,
         TestSceneUI,
     ],

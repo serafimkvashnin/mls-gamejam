@@ -30,7 +30,7 @@ export class LoaderScene extends Phaser.Scene {
             //     PhaserEngine.SceneSelector.SwitchScene(this, SceneID.TestScene);
             // })
             NerdEngine.InitContent();
-            PhaserEngine.SceneSelector.SwitchScene(this, SceneID.TestScene);
+            PhaserEngine.SceneSelector.SwitchScene(this, SceneID.JamScene);
 
                 this.load.textureManager.each(texture => {
                     texture.setFilter(FilterMode.NEAREST);

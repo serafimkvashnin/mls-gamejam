@@ -5,6 +5,8 @@ import { SoundResource } from "../resources/SoundResource";
 //Question: Should we split TextureId to ImageID, SpriteSheetID and so on? @Felix
 
 export enum TextureId {
+    SerafimHead = "SerafimHead",
+
     PlayerRunning = "PlayerRunning",
 
     MonsterIdle = "MonsterIdle",
@@ -33,6 +35,8 @@ export enum MusicId {
 
 export class ResourceRegister {
     static Textures: {[key: string] : ImageResource | SpriteSheetResource} = {
+
+        SerafimHead: new ImageResource(TextureId.SerafimHead, "assets/sprites/serafim_head.png"),
 
         // Player
         PlayerRunning: new SpriteSheetResource(TextureId.PlayerRunning, "assets/sprites/Eggs.png", {

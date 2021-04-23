@@ -3,6 +3,8 @@
 
 export enum SceneID {
     LoaderScene = "LoaderScene",
+    JamScene = "JamScene",
+
     TestScene = "TestScene",
     TestSceneUI = "TestSceneUI",
 }
