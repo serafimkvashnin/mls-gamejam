@@ -8,6 +8,7 @@ import {SceneSelector} from "./game/managers/SceneSelector";
 import {TestSceneUI} from "./game/scenes/game/TestSceneUI";
 import { nerdEngine } from "./nerdEngine";
 import { GameManager } from "./game/managers/GameManager";
+import { InitEngine } from "./engineSetup";
 
 export let NerdEngine: nerdEngine;
 export let PhaserEngine: GameEngine;
@@ -66,39 +67,39 @@ export class GameEngine extends Phaser.Game {
     }
 }
 
-export function StartGame(isLoading: boolean) {
-    NerdEngine.Reset();
-    //NerdEngine.ResetContent();
-    Game = new GameManager(NerdEngine);
-    (<any>window).Game = Game;
-    NerdEngine.LoadModules();
-
-    NerdEngine.Events.OnContentLoaded.Register(() => {
-        console.log(`OnContentLoaded event`);
-    })
-
-    if (!isLoading) {
-        NerdEngine.OnContentLoaded();
-    }
-}
+// export function StartGame(isLoading: boolean) {
+//     NerdEngine.Reset();
+//     //NerdEngine.ResetContent();
+//     Game = new GameManager(NerdEngine);
+//     (<any>window).Game = Game;
+//     NerdEngine.LoadModules();
+//
+//     NerdEngine.Events.OnContentLoaded.Register(() => {
+//         console.log(`OnContentLoaded event`);
+//     })
+//
+//     if (!isLoading) {
+//         NerdEngine.OnContentLoaded();
+//     }
+// }
 
 window.addEventListener("load", () => {
     PhaserEngine = new GameEngine(config);
-
     (<any>window).PhaserEngine = PhaserEngine;
-    console.log(`[DevInfo] Use 'PhaserEngine' to access Phaser`);
 
-    NerdEngine = new nerdEngine({
-        gameName: "Pew pew pew Idle",
-        gameVersion: "pre alpha pre beta 0.1",
-        buildMode: "Preview",
-        contentInitCallback: () => StartGame(false),
-        contentResetCallback: () => StartGame(true),
-    });
-
+    NerdEngine =  InitEngine();
     (<any>window).Nerd = NerdEngine;
-    console.log(`[DevInfo] Use 'Nerd' to access nerdEngine`);
 
+    // NerdEngine = new nerdEngine({
+    //     gameName: "Pew pew pew Idle",
+    //     gameVersion: "pre alpha pre beta 0.1",
+    //     buildMode: "Preview",
+    //     contentInitCallback: () => StartGame(false),
+    //     contentResetCallback: () => StartGame(true),
+    // });
+
+    console.log(`[DevInfo] Use 'PhaserEngine' to access Phaser`);
+    console.log(`[DevInfo] Use 'Nerd' to access nerdEngine`);
     console.log(`[DevInfo] Use 'Game' to access GameManager`);
 });
 

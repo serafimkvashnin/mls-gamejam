@@ -1,7 +1,14 @@
-import {RawFloat, RawFloatValue} from "../../data/float";
+import { RawFloat, RawFloatValue } from "../../data";
 import {Tweak} from "./tweak";
+import { GameEvent } from "../../components";
 
 export class DifficultyTweakArray {
+
+    public readonly Events = {
+        OnDifficultyChanged: new GameEvent<DifficultyTweakArray, { value: number }>(),
+        OnToggled: new GameEvent<DifficultyTweakArray, { enabled: boolean }>(),
+    }
+
     public Tweaks: DifficultyTweak[];
     constructor(tweaks: DifficultyTweak[] | DifficultyTweak) {
         this.Tweaks = Array.isArray(tweaks) ? tweaks : [ tweaks ];
@@ -9,6 +16,7 @@ export class DifficultyTweakArray {
 
     Toggle(enabled: boolean) {
         this.Tweaks.forEach(item => item.Tweak.Toggle(enabled));
+        this.Events.OnToggled.Trigger(this, { enabled });
     }
 
     AddOrUpdateToGameData() {
@@ -17,10 +25,16 @@ export class DifficultyTweakArray {
 
     SetDifficulty(value: RawFloat) {
         this.Tweaks.forEach(item => item.SetDifficulty(value));
+
+        this.Events.OnDifficultyChanged.Trigger(this, { value: RawFloatValue(value) })
     }
 }
 
 export class DifficultyTweak {
+
+    public readonly Events = {
+        OnDifficultyChanged: new GameEvent<DifficultyTweak, { before: number, value: number }>(),
+    }
 
     private minLevel: number;
     private step: number;
@@ -56,6 +70,8 @@ export class DifficultyTweak {
     }
 
     SetDifficulty(value: RawFloat, disableWhenZero: boolean = false) {
+        const before = this.difficulty;
+
         value = RawFloatValue(value);
         this.difficulty = value;
 
@@ -81,5 +97,7 @@ export class DifficultyTweak {
             this.tweak.Toggle(true);
             this.tweak.SetToLevel(steps);
         }
+
+        this.Events.OnDifficultyChanged.Trigger(this, { before, value: this.Difficulty })
     }
 }

@@ -59,6 +59,8 @@ export let FloatContainer: DataContainer<Float> = {
 
 //TODO !!! КОРОЧЕ, ПРОСТО СДЕЛАТЬ GAME[TYPE] КЛАССЫ, ЧТОБ НЕ МУЧАТЬСЯ, СЕРЬЁЗНО
 
+export type ContainerOnValueChanged<T> = (value: T) => void;
+
 @Expose()
 export class Container<T> extends GameObject {
 
@@ -70,13 +72,18 @@ export class Container<T> extends GameObject {
     @Exclude()
     private baseValue: T;
 
-    constructor(engine: nerdEngine | null, id: string, value: T, dataManager?: DataContainer<T>)
+    @Exclude()
+    private onChanged?: ContainerOnValueChanged<T>;
+
+    constructor(engine: nerdEngine | null, id: string, value: T, dataManager?: DataContainer<T>,
+                onChanged?: ContainerOnValueChanged<T>)
     {
         super(engine, ClassNames.Container, id);
 
         this.value = value
         this.baseValue = this.value;
         this.DataManager = dataManager;
+        this.onChanged = onChanged;
     }
 
     get BaseValue(): T {
@@ -93,6 +100,10 @@ export class Container<T> extends GameObject {
 
     set Value(value: T) {
         this.value = value;
+
+        if (this.onChanged) {
+            this.onChanged(value);
+        }
     }
 
     Reset() {

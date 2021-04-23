@@ -1,10 +1,11 @@
-import {ClassNames, GameObject} from "../logic/gameObject";
+import {ClassNames, GameObject} from "../logic";
 import {Time} from "../data";
 import {GetElapsedTimeMs} from "../utils/utilsMath";
 import {GameData} from "../data";
 import {DelayedAction} from "./delayedAction";
 import {Exclude} from "class-transformer";
 import { nerdEngine } from "../nerdEngine";
+import { GameEvent } from "../components";
 
 /**
  * @return Returns, is activation canceled or not
@@ -16,6 +17,10 @@ export type ActionWithCooldownCallback = (sender: ActionWithCooldown) => void;
 // но потом было бы неплохо таки заимпелементить это (нужно будет как-то сохранять прогресс релоада или типо того)
 
 export class ActionWithCooldown extends GameObject {
+    public readonly Events = {
+        OnReloaded: new GameEvent<ActionWithCooldown, {}>(),
+        OnActivated: new GameEvent<ActionWithCooldown, { isCanceled: boolean }>(),
+    }
 
     @Exclude()
     public readonly OnActivate: ActionWithCooldownOnActivate;
@@ -89,6 +94,8 @@ export class ActionWithCooldown extends GameObject {
             const isCanceled = this.OnActivate(this);
             //const isCanceled = typeof result == "undefined" ? false : result;
 
+            this.Events.OnActivated.Trigger(this, { isCanceled });
+
             if (!isCanceled && this.IsAutoReloading) {
                 this.StartReloading();
             }
@@ -110,7 +117,6 @@ export class ActionWithCooldown extends GameObject {
 
             this.reloadingAction = new DelayedAction(null, this.ElapsedMs!, true, () => {
                 const awc = this
-                console.log('Reloading finished!');
                 awc.OnReloaded();
             })
         }
@@ -129,15 +135,17 @@ export class ActionWithCooldown extends GameObject {
     }
 
     private OnReloaded() {
-        if (this.OnReloadCallback) {
-            this.OnReloadCallback(this);
-        }
-
         if (this.isReloading) {
             this.isReloading = false;
             this.reloadingAction = null;
             this.reloadingStarted = null;
             this.isReady = true;
+
+            if (this.OnReloadCallback) {
+                this.OnReloadCallback(this);
+            }
+
+            this.Events.OnReloaded.Trigger(this, {});
         }
         else {
             throw new Error(`OnReload called, but ActionWithCooldown '${this.ID}' is not reloading!`);

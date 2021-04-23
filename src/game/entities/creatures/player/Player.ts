@@ -77,8 +77,8 @@ export class Player extends Creature {
         this.setDrag(this.deceleration.Value.AsNumber);
         this.setMaxVelocity(this.acceleration.Value.AsNumber);
 
-        this.acceleration.Events.OnChanged.Register((sender, args) => {
-            this.setMaxVelocity(args.value.AsNumber);
+        this.acceleration.Events.OnRecomputed.Register((sender, args) => {
+            this.setMaxVelocity(args.newValue.AsNumber);
         })
     }
     

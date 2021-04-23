@@ -3,7 +3,6 @@ import { serialize, Type } from "class-transformer";
 import LZString from "lz-string";
 import { GameObject, IGameObject } from "../../logic";
 import { ISaveMaker } from "./ISaveMaker";
-import { LoadedContentFixer } from "./loadedContentFixer";
 
 export class SaveData {
     @Type(() => GameObject)
@@ -26,14 +25,8 @@ export class SaveData {
 
 export class SaveManager {
 
-    public readonly SlotName: string;
-    public readonly Backup1SlotName: string;
-    public readonly Backup2SlotName: string;
+    constructor(public readonly Engine: nerdEngine, public readonly SaveMaker: ISaveMaker) {
 
-    constructor(public readonly Engine: nerdEngine, public readonly SaveMaker: ISaveMaker, slotName: string = "Save1") {
-        this.SlotName = slotName;
-        this.Backup1SlotName = slotName + "_backup1";
-        this.Backup2SlotName = slotName + "_backup2";
     }
     //todo bug я почти уверен тут будет баг в том что теперь у меня TimerStorage и ContentStorage объединены
     // а раньше они были отдельно, поэтому таймеры со старых сейвов не загрузяться. с другой стороны, в DFI
@@ -41,9 +34,8 @@ export class SaveManager {
 
     //todo custom save data type
 
-
     SaveGame() {
-        this.SaveMaker.SaveGame(this);
+        this.SaveMaker.SaveGame();
     }
 
     GetSaveData() {

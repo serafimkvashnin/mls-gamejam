@@ -2,20 +2,15 @@
 // ещё сюда надо добавить разные виды сортировки при получении
 // сам класс должен быть в Game
 
-import {KongStat, KongStatValue} from "./kongStat";
+import {KongStat} from "./kongStat";
 import {User} from "./user";
 import {UserList} from "./usersList";
 import {ObjectStorage} from "../data/objectStorage";
 import {Time} from "../data";
 import {IStorageItem} from "../data";
 import { TimeToString } from "../utils/utilsText";
-
-export enum StatScope {
-    Day = 'Day',
-    Week = 'Week',
-    All = 'All',
-    Friends = 'Friends',
-}
+import { StatScope } from "./statsScope";
+import { KongStatValue } from "./kongStatValue";
 
 export class StatisticsManager extends ObjectStorage<Statistic> {
     public readonly Statistics: Statistic[];

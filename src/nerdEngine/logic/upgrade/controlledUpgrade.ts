@@ -21,12 +21,16 @@ export class ControlledUpgrade extends Upgrade {
         this.selectedLevel = new Float(0);
     }
 
-    Buy(count?: RawFloat): Float {
-        let boughtCount = super.Buy(count);
-        this.maxLevel = this.maxLevel.Plus(boughtCount)
-        this.SetToLevel(this.maxLevel);
+    Buy(count?: RawFloat): { isBuyMax: boolean, count: Float } {
+        let buyResult = super.Buy(count, false);
 
-        return boughtCount;
+        if (!buyResult.isBuyMax) {
+            this.maxLevel = this.maxLevel.Plus(buyResult.count)
+            this.SetToLevel(this.maxLevel);
+        }
+
+        this.Events.OnBought.Trigger(this, { result: buyResult });
+        return buyResult;
     }
 
     get SelectedLevel() {

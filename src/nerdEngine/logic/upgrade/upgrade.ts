@@ -1,15 +1,13 @@
-import {Price} from "../price";
-import {PriceArray} from "../price";
-import {ClassNames, GameObject} from "../gameObject";
-import {TweakArray} from "../tweak";
-import {Tweak} from "../tweak";
-import {Float, RawFloat} from "../../data";
-import {Exclude, Expose, Type} from "class-transformer";
-import {UpgradeGUI} from "./upgradeGUI";
-import {Setting} from "../setting";
-import {Level} from "../../components";
-import {WalletValueArray} from "../wallet";
+import { IPrice, Price, PriceArray } from "../price";
+import { ClassNames, GameObject } from "../gameObject";
+import { Tweak, TweakArray } from "../tweak";
+import { Float, RawFloat } from "../../data";
+import { Exclude, Expose, Type } from "class-transformer";
+import { Setting } from "../setting";
+import { GameEvent, Level } from "../../components";
+import { Wallet, WalletValueArray } from "../wallet";
 import { nerdEngine } from "../../nerdEngine";
+import { LogColored } from "../../utils/utilsText";
 
 export enum UpgradeClassID {
     Upgrade = "Upgrade",
@@ -23,22 +21,35 @@ export type BuyCountInfo = {
 }
 
 export type UpgradeConfig = {
-    engine: nerdEngine | null,
+    engine: nerdEngine,
     id: string,
-    buyCount?: Setting<any> | null,
+    buyCount?: Setting<any>,
     level?: Level,
     pricesArray: PriceArray,
     tweakArray: TweakArray,
     onBuyFunc?: UpgradeOnBought,
     isThemeUnlocked?: boolean,
-    condition?: UpgradeCondition
+    condition?: UpgradeCondition,
+    autoAddUnlockCondition?: boolean,
 }
+
+export type UpgradeBuyResult = { isBuyMax: boolean, count: Float, spent?: WalletValueArray };
 
 export type UpgradeCondition = (upgrade: Upgrade, buyCount: Float) => boolean;
 
 export type UpgradeOnBought = (upgrade: Upgrade, count: Float, spent: WalletValueArray) => void;
 
 export class Upgrade extends GameObject {
+
+    //todo note: вообще не уверен что это хорошая идея, но чисто по рофлу можно попробовать
+    // public static StaticEvents = {
+    //     OnAnyBought: new GameEvent<Upgrade, { result: UpgradeBuyResult }>()
+    // }
+
+    public readonly Events = {
+        OnBought: new GameEvent<Upgrade, { result: UpgradeBuyResult }>(),
+        OnUnlocked: new GameEvent<Upgrade, {}>(),
+    }
 
     @Expose()
     protected subClassID: UpgradeClassID;
@@ -67,7 +78,7 @@ export class Upgrade extends GameObject {
     public Theme: string;
 
     @Expose()
-    public IsThemeUnlocked: boolean
+    private isThemeUnlocked: boolean
 
     @Exclude()
     public readonly Condition?: UpgradeCondition;
@@ -81,7 +92,8 @@ export class Upgrade extends GameObject {
     constructor(engine: nerdEngine | null, id: string,
                 buyCount: Setting<any> | null, level: Level,
                 pricesArray: PriceArray, tweakArray: TweakArray,
-                onBuyFunc?: UpgradeOnBought, isThemeUnlocked: boolean = false, condition?: UpgradeCondition)
+                onBuyFunc?: UpgradeOnBought, isThemeUnlocked: boolean = false,
+                condition?: UpgradeCondition, autoAddUnlockCondition: boolean = true)
     {
         super(engine, ClassNames.Upgrade, id);
 
@@ -98,9 +110,9 @@ export class Upgrade extends GameObject {
         this.OnBuyEvent = onBuyFunc;
         this.GUI = new UpgradeGUI(this);
         this.Theme = `Upgrade::${id}`;
-        this.IsThemeUnlocked = isThemeUnlocked;
+        this.isThemeUnlocked = isThemeUnlocked;
         this.Condition = condition;
-        this.autoAddUnlockCondition = true;
+        this.autoAddUnlockCondition = autoAddUnlockCondition;
 
         this.CheckNumbers();
 
@@ -110,7 +122,15 @@ export class Upgrade extends GameObject {
     }
 
     static FromConfig(c: UpgradeConfig): Upgrade {
-        return new Upgrade(c.engine, c.id, c.buyCount ?? null, c.level ?? new Level(0, null), c.pricesArray, c.tweakArray, c.onBuyFunc, c.isThemeUnlocked, c.condition);
+        return new Upgrade(c.engine, c.id,
+            c.buyCount ?? null,
+            c.level ?? new Level(0, null),
+            c.pricesArray,
+            c.tweakArray,
+            c.onBuyFunc,
+            c.isThemeUnlocked,
+            c.condition,
+            c.autoAddUnlockCondition);
     }
 
     /**
@@ -126,7 +146,9 @@ export class Upgrade extends GameObject {
 
         try {
             for (const price of this.Prices) {
-                price.Calculator.Check(price.Step);
+                if (Price.Is(price)) {
+                    price.Calculator.Check(price.Step);
+                }
             }
 
             for (const tweak of this.Tweaks) {
@@ -136,6 +158,17 @@ export class Upgrade extends GameObject {
         catch (e) {
             console.log(`[Upgrade.CheckNumbers] Bad numbers in upgrade: '${this.ID}'`);
             throw e;
+        }
+    }
+
+    get IsThemeUnlocked() {
+        return this.isThemeUnlocked;
+    }
+
+    set IsThemeUnlocked(value) {
+        this.isThemeUnlocked = value;
+        if (value) {
+            this.Events.OnUnlocked.Trigger(this, {});
         }
     }
 
@@ -151,9 +184,10 @@ export class Upgrade extends GameObject {
         this.Level.Reset();
         this.PriceArray.Reset();
         this.TweakArray.Reset();
+        //note: upgrade unlock
     }
 
-    get Prices(): Price[] {
+    get Prices(): IPrice[] {
         return this.PriceArray.Prices;
     }
 
@@ -197,7 +231,7 @@ export class Upgrade extends GameObject {
         }
 
         count = count ? new Float(count) : this.BuyCountInfo.Count;
-        count = this.CorrectBuyCount(count)
+        //count = this.CorrectBuyCount(count)
 
         let condition = this.Condition ? this.Condition(this, count) : true;
 
@@ -209,20 +243,45 @@ export class Upgrade extends GameObject {
     /**
      * @return Count of purchases
      */
-    BuyMax(maxCount: RawFloat | undefined = undefined): Float {
-        let bought = new Float(0);
-        while ((maxCount ? bought < maxCount : true) && this.IsCanBuy(1)) {
-            this.Buy(1);
-            bought = Float.Plus(bought, 1);
+    // BuyMax(maxCount: RawFloat | undefined = undefined): Float {
+    //     let bought = new Float(0);
+    //
+    //     while ((maxCount ? bought < maxCount : true) && this.IsCanBuy(1)) {
+    //         this.Buy(1);
+    //         bought = Float.Plus(bought, 1);
+    //     }
+    //
+    //     return bought;
+    // }
+
+    BuyMax(maxCount: RawFloat | undefined = undefined): UpgradeBuyResult {
+        let count = 0;
+
+        while ((maxCount ? count < maxCount : true) && this.IsCanBuy(count + 1)) {
+            //this.Buy(1);
+            count++;
         }
 
-        return bought;
+        let result: undefined | UpgradeBuyResult;
+        if (count > 0) {
+            result = this.Buy(count);
+            //console.log(`BuyMax: bought ${count} of ${this.ID}`)
+        }
+        else {
+            //console.log(`BuyMax: can't buy any of ${this.ID}`)
+        }
+
+        return {
+            count: new Float(count),
+            spent: result ? result.spent : undefined,
+            isBuyMax: true,
+        }
     }
 
     /**
      * @return Count of purchases
      */
-    Buy(count?: RawFloat): Float {
+    Buy(count?: RawFloat, triggerEvent: boolean = true): UpgradeBuyResult {
 
         //todo maybe separate to different functions Buying, updating tweaks and so on.. Because function become too complicated
         // and hard to do ReInit
@@ -251,14 +310,27 @@ export class Upgrade extends GameObject {
             this.TweakArray.Toggle(true);
             this.TweakArray.Upgrade(count);
 
-            if (this.OnBuyEvent) {
-                this.OnBuyEvent(this, count, spent);
+            if (triggerEvent) {
+                if (this.OnBuyEvent) this.OnBuyEvent(this, count, spent);
+
+                this.Events.OnBought.Trigger(this, {
+                    result: {
+                        spent, count, isBuyMax: false,
+                    }
+                });
             }
-            return count;
+
+            return {
+                isBuyMax: false,
+                count: count,
+            }
         }
         else {
-            console.log(`[WARNING!] Trying to buy count: ${count}, but can't actually buy (skip)!`);
-            return new Float(0);
+            LogColored(`[WARNING!] Trying to buy count: ${count}, but can't actually buy (skip)!`, '#ffad55');
+            return {
+                isBuyMax: false,
+                count: new Float(0),
+            }
         }
     }
 
@@ -273,5 +345,176 @@ export class Upgrade extends GameObject {
         //  we updating links to the wallet and also adding local wallet value to global, to get buy change
 
         this.PriceArray.SetWalletsFromContent(engine, true, this.ID);
+
+        //note: on older versions isThemeUnlocked is not saved, so i should handle this, to not set isThemeUnlocked to undefined
+        if (typeof oldUpgrade.isThemeUnlocked != "undefined") {
+            if (this.Engine) {
+                this.Engine.Events.OnContentLoaded.Register(() => {
+                    this.IsThemeUnlocked = oldUpgrade.isThemeUnlocked;
+                });
+            } else {
+                this.IsThemeUnlocked = oldUpgrade.isThemeUnlocked;
+            }
+        }
+    }
+}
+
+export class UpgradeGUI {
+    constructor(private readonly upgrade: Upgrade) {}
+
+    //todo move to PriceArray
+    GetPrice(price: number | Wallet | Price): IPrice {
+        if (typeof price == "number") {
+            return this.upgrade.Prices[price as number];
+        }
+        else if (price instanceof Wallet) {
+            return this.upgrade.PriceArray.GetByWallet(price as Wallet);
+        }
+        else {
+            return price as Price;
+        }
+    }
+
+    GetPriceValue(priceOrSearchMethod: number | Wallet | Price): Float {
+        return this.GetPrice(priceOrSearchMethod).Value;
+    }
+
+    // relativeLevel means, 1 is just value, 2 is next value, and so on
+    GetPriceValueOnLevel(priceOrSearchMethod: number | Wallet | Price, relativeLevel: RawFloat | null): Float {
+
+        const price = this.GetPrice(priceOrSearchMethod);
+
+        relativeLevel = relativeLevel ? new Float(relativeLevel) : new Float(this.upgrade.BuyCountInfo.Count);
+
+        if (this.upgrade.Level.IsMaxed) {
+            return price.Value;
+        }
+        else {
+            relativeLevel = this.CorrectLevel(relativeLevel, "Price");
+            return price.GetValueOnLevel(relativeLevel);
+        }
+    }
+
+    CorrectLevel(value: Float, type: "Price" | "Tweak"): Float {
+        if (this.upgrade.Level.ValueMax) {
+            let currentLevels = this.upgrade.Level.Value;
+
+            if (this.upgrade.Level.Value.IsEqual(0) || type == "Price") {
+                currentLevels = this.upgrade.Level.Value;
+            }
+            else {
+                currentLevels = this.upgrade.Level.Value.Minus(1);
+            }
+
+            let buyCount = Float.Min(value, this.upgrade.Level.ValueMax.Minus(currentLevels));
+
+            if (!this.upgrade.Level.Value.IsEqual(0) && buyCount.IsMore(1)) {
+                buyCount = Float.Max(2, buyCount);
+            }
+
+            return buyCount;
+        }
+        else {
+            return value;
+        }
+    }
+
+    //todo move to TweakArray
+    GetTweak(tweakOrSearchMethod: number | Tweak): Tweak {
+        if (typeof tweakOrSearchMethod == "number") {
+            return this.upgrade.Tweaks[tweakOrSearchMethod as number];
+        }
+        else {
+            return tweakOrSearchMethod as Tweak;
+        }
+    }
+
+    GetTweakValue(tweakOrSearchMethod: number | Tweak, whatToReturnIfNotBought: Float = new Float(0)): Float {
+        const tweak = this.GetTweak(tweakOrSearchMethod);
+
+        if (this.upgrade.Level.Value.IsNotEqual(0)) {
+            return tweak.Value;
+        }
+        else {
+            return whatToReturnIfNotBought;
+        }
+    }
+
+    GetTweakDataValue(tweakOrSearchMethod: number | Tweak, gameDataID: number): Float {
+        const tweak = this.GetTweak(tweakOrSearchMethod);
+        return tweak.TargetList[gameDataID].Value;
+    }
+
+    //todo there can be some refactoring
+    GetTweakDataValueOnLevel(tweakOrSearchMethod: number | Tweak, gameDataID: number, relativeLevel: RawFloat | null): Float {
+        const tweak = this.GetTweak(tweakOrSearchMethod)
+        const gameData = tweak.TargetList[gameDataID];
+        const valueBefore = gameData.Value;
+
+        relativeLevel = relativeLevel ? new Float(relativeLevel) : new Float(this.upgrade.BuyCountInfo.Count);
+
+        if (this.upgrade.Level.IsMaxed) {
+            return valueBefore;
+        }
+        else {
+            relativeLevel = this.upgrade.Level.Value.IsEqual(0)
+                ? (relativeLevel.IsEqual(1)
+                    ? new Float(1)
+                    : relativeLevel.Plus(0))
+                : relativeLevel.Plus(1);
+
+            //todo universal function, to not duplicate this code
+            if (this.upgrade.Level.ValueMax) {
+                // relativeLevel = Float.Max(2, Float.Min(relativeLevel, this.upgrade.Level.ValueMax.Minus(this.upgrade.Level.Value)));
+                relativeLevel = this.CorrectLevel(relativeLevel, "Tweak");
+            }
+
+            let tweaksAfterUpgrade = gameData.TweakArray.Items.slice(0);
+            let countBefore = tweaksAfterUpgrade.length;
+            for (let i = 0; i < tweaksAfterUpgrade.length; i++) {
+                if (tweaksAfterUpgrade[i].ID == tweak.ID) {
+                    tweaksAfterUpgrade.splice(i, 1);
+                }
+            }
+            if (countBefore != tweaksAfterUpgrade.length + 1) {
+                if (this.upgrade.Engine?.System.IsContentLoaded) {
+                    throw new Error(`Tweaks wasn't filtered correctly. Count change: ${countBefore - tweaksAfterUpgrade.length}`);
+                }
+                // else {
+                //     console.log(`[WARNING] Got "Tweaks wasn't filtered correctly", but content is not loaded (${this.upgrade.ID})`)
+                // }
+            }
+
+            const valueOnLevel = tweak.GetValueOnLevel(relativeLevel);
+            const tweakAfterUpgrade = tweak.GetCopyWithValue(valueOnLevel);
+            tweakAfterUpgrade.Toggle(true);
+            tweaksAfterUpgrade.push(tweakAfterUpgrade);
+
+            return gameData.GetValueWithTweaks(tweaksAfterUpgrade);
+        }
+    }
+
+    // relativeLevel means, 1 is just value, 2 is next value, and so on
+    GetTweakValueOnLevel(tweakOrSearchMethod: number | Tweak, relativeLevel: RawFloat | null): Float {
+        const tweak = this.GetTweak(tweakOrSearchMethod)
+
+        relativeLevel = relativeLevel ? new Float(relativeLevel) : new Float(this.upgrade.BuyCountInfo.Count);
+
+        if (this.upgrade.Level.IsMaxed) {
+            return tweak.Value;
+        }
+        else {
+            relativeLevel = this.upgrade.Level.Value.IsEqual(0)
+                ? (relativeLevel.IsEqual(1)
+                    ? new Float(1)
+                    : relativeLevel.Plus(1))
+                : relativeLevel.Plus(1);
+
+            if (this.upgrade.Level.ValueMax) {
+                // relativeLevel = Float.Max(2, Float.Min(relativeLevel, this.upgrade.Level.ValueMax.Minus(this.upgrade.Level.Value)));
+                relativeLevel = this.CorrectLevel(relativeLevel, "Tweak");
+            }
+            return tweak.GetValueOnLevel(relativeLevel)
+        }
     }
 }

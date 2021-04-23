@@ -53,6 +53,10 @@ export function RemoveBBCode(text: string): string {
     return text.replace(/\[\/?(?:b|i|u|url|quote|code|img|color|size)*?.*?\]/img, '');
 }
 
+export function RemoveSlashN(text: string): string {
+    return text.replace(/\n/g, '');
+}
+
 export function FormatTimeInSeconds(time: Time): string {
     let seconds = Float.Floor(time.TotalSeconds);
     let hours: Float;
@@ -106,7 +110,7 @@ export function NumberToString(number: RawFloat, notation?: NumberNotation, floa
 
     const float = new Float(number);
     if (float.IsLess(1000)) {
-        if (FractionalPart(float.AsNumber).IsMore(0)) {
+        if (!FractionalPart(float.AsNumber).IsLess(0.1)) {
             return float.ToStringFixed(floats);
         }
         else {
@@ -121,9 +125,8 @@ export function NumberToString(number: RawFloat, notation?: NumberNotation, floa
             return parts[0] + newSecondPart;
         }
         else {
-
             const letter = new StandardNotation();
-            return letter.format(float.AsDecimal, 2, 0);
+            return letter.format(float.AsDecimal, floats, 0);
         }
     }
     //todo implement floats and notation settings
@@ -132,8 +135,9 @@ export function NumberToString(number: RawFloat, notation?: NumberNotation, floa
 //todo ability to show only seconds, minutes and so on
 export function TimeToString(timeOrMS: Time | RawFloat,
                              showOnlyTwo: boolean = true,
-                             short: boolean = true,
+                             shortNames: boolean = true,
                              intSeconds: boolean = false,
+                             shortNumbers: boolean = true,
                              notation: NumberNotation = "Letter"): string
 {
     let seconds;
@@ -159,6 +163,21 @@ export function TimeToString(timeOrMS: Time | RawFloat,
     seconds.DoMinus(Float.Times(days, 86400));
     */
 
+    let numberToString = (n: RawFloat): string => {
+        n = new Float(n);
+        if (shortNumbers) {
+            return NumberToString(n, notation);
+        }
+        else {
+            if (n.IsLess(1000)) {
+                return NumberToString(n, notation);
+            }
+            else {
+                return n.ToStringFixed(0);
+            }
+        }
+    };
+
     const hours = Float.Floor(seconds.Divide(3600));
     seconds = Float.Minus(seconds, Float.Times(hours, 3600));
     const minutes = Float.Floor(seconds.Divide(60));
@@ -180,35 +199,35 @@ export function TimeToString(timeOrMS: Time | RawFloat,
     text += (days > 0 ? `${days}d ` : '');
     */
 
-    let msStr = short ? "ms" : (seconds.Divide(1000).Floor().IsEqual(1) ? " millisecond" : " milliseconds");
-    let secondsStr = short ? "s" : (seconds.IsEqual(1) ? " second" : " seconds");
-    let minutesStr = short ? "m" : (minutes.IsEqual(1) ? " minute" : " minutes");
-    let hoursStr = short ? "h" : (hours.IsEqual(1) ? " hour" : " hours");
+    let msStr = shortNames ? "ms" : (seconds.Divide(1000).Floor().IsEqual(1) ? " millisecond" : " milliseconds");
+    let secondsStr = shortNames ? "s" : (seconds.IsEqual(1) ? " second" : " seconds");
+    let minutesStr = shortNames ? "m" : (minutes.IsEqual(1) ? " minute" : " minutes");
+    let hoursStr = shortNames ? "h" : (hours.IsEqual(1) ? " hour" : " hours");
 
     if (hours.IsMore(0)) {
-        parts.push(hours.IsLess(1000) ? `${NumberToString(hours, notation)}${hoursStr} ` : `${NumberToString(hours, notation)} hours`);
+        parts.push(hours.IsLess(1000) ? `${numberToString(hours)}${hoursStr} ` : `${numberToString(hours)} hours`);
     }
 
     if (minutes.IsMore(0) && hours.IsLess(1000)) {
-        parts.push(`${NumberToString(minutes, notation)}${minutesStr} `);
+        parts.push(`${numberToString(minutes)}${minutesStr} `);
     }
 
     if (seconds.IsMore(0) && hours.IsLess(1000)) {
         if (parts.length !== 0) {
-            parts.push(`${NumberToString(Float.Floor(seconds), notation)}${secondsStr} `);
+            parts.push(`${numberToString(Float.Floor(seconds))}${secondsStr} `);
         }
         else {
             if (FractionalPart(seconds).IsNotEqual(0)) {
                 parts.push(`${seconds.ToFixed(2)}${secondsStr} `);
             }
             else {
-                parts.push(`${NumberToString(Float.Floor(seconds), notation)}${secondsStr} `);
+                parts.push(`${numberToString(Float.Floor(seconds))}${secondsStr} `);
             }
         }
     }
 
     if (seconds.IsLess(0)) {
-        parts.push(`${NumberToString(Float.Floor(seconds.Times(1000)), notation)}${msStr} `);
+        parts.push(`${numberToString(Float.Floor(seconds.Times(1000)))}${msStr} `);
     }
 
     for (let i = 0; i < parts.length; i++) {
@@ -220,4 +239,10 @@ export function TimeToString(timeOrMS: Time | RawFloat,
     }
 
     return text.trimEnd();
+}
+
+export type HEXString = string;
+
+export function LogColored(text: string, color: HEXString) {
+    console.log(`%c${text}`, `color:${color}`);
 }

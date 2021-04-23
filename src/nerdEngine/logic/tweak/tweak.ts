@@ -3,7 +3,7 @@ import {ValueCalc} from "../../math";
 import {Float, RawFloat} from "../../data";
 import {Percent} from "../../tools";
 import {Exclude, Type} from "class-transformer";
-import {UniqueID} from "../../components/uniqueID";
+import { GameEvent, UniqueID } from "../../components";
 
 //todo make separate class for TweakFunctions
 export abstract class TweakFunction {
@@ -44,7 +44,7 @@ export class TweakDivide extends TweakFunction {
     }
 }
 
-export class TweakFunctionWithPercent {
+export class TweakPercent {
     public readonly Priority: TweakPriority = TweakPriority.Percent;
 
     Get(value: RawFloat, tweakValue: RawFloat, _tweak: Tweak): Float {
@@ -66,7 +66,12 @@ export enum TweakValueType {
 }
 
 export class Tweak {
+    public readonly Events = {
+        LevelChanged: new GameEvent<Tweak, { level: Float }>(),
+        //AnyGameDataValueChanged: new GameEvent<Tweak, { gameData: GameData }>()
+    }
 
+    @Exclude()
     public static UniqueID: UniqueID = new UniqueID("Tweak");
 
     @Exclude()
@@ -92,8 +97,6 @@ export class Tweak {
     @Type(() => ValueCalc)
     public readonly Calculator: ValueCalc;
 
-    public readonly ValueType: TweakValueType;
-
     /**
      * Эта штука используется ТОЛЬКО для того чтобы определить внутри самого твика (в методе апгрейда),
      * был ли куплен твик. В другом коде это никак не используется. При получении информации об апгрейде
@@ -107,11 +110,13 @@ export class Tweak {
     @Type(() => Float)
     private readonly baseStep: Float;
 
-    private readonly baseActive: boolean;
+    private readonly baseActive: boolean
+
+    @Exclude()
+    public readonly ValueType: TweakValueType;
 
     constructor(id: string, active: boolean, value: RawFloat, step: RawFloat, calc: ValueCalc,
-                tweakFunction: TweakFunction, targetList: GameData | GameData[],
-                valueType: TweakValueType = TweakValueType.Default)
+                tweakFunction: TweakFunction, targetList: GameData | GameData[], valueType: TweakValueType = TweakValueType.Default)
     {
         this.ClassID = this.constructor.name;
         this.ID = id;
@@ -121,7 +126,6 @@ export class Tweak {
         this.Function = tweakFunction;
         this.TargetList = Array.isArray(targetList) ? targetList : [ targetList ];
         this.Calculator = calc;
-        this.ValueType = valueType;
 
         this.isBought = false;
         this.baseValue = this.value;
@@ -129,6 +133,16 @@ export class Tweak {
         this.baseActive = this.active;
 
         this.UID = Tweak.UniqueID.GetNextID();
+
+        this.ValueType = valueType;
+
+        // this.TargetList.forEach(gameData => {
+        //     GameEvent.RegisterMultiple([
+        //         gameData.Events.OnRecomputed,
+        //     ], (sender) => {
+        //         this.Events.AnyGameDataValueChanged.Trigger(this, { gameData: sender });
+        //     });
+        // });
     }
 
     Reset() {
@@ -212,6 +226,7 @@ export class Tweak {
 
         this.value = this.Calculator.GetElement(this.baseValue, this.Step, level);
         this.AddOrUpdateToGameData();
+        this.Events.LevelChanged.Trigger(this, { level });
     }
 
     AddOrUpdateToGameData() {

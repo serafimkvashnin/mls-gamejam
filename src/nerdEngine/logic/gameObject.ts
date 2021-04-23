@@ -12,6 +12,7 @@ export enum ClassNames {
     Idler = "Idler",
     Points = "Points",
     Price = "Price",
+    CustomPrice = "CustomPrice", //todo subclassID?
     Setting = "Setting",
     Stat = "Stat",
     Timer = "Timer",
@@ -25,12 +26,11 @@ export enum ClassNames {
     GameFloat = "GameFloat",
 }
 
-export interface IGameObject extends ISerializable<IGameObject> /*<ClassType extends string = string, Type extends IStorageItem>*/ {
+export interface IGameObject extends ISerializable<IGameObject>, IUpdate /*<ClassType extends string = string, Type extends IStorageItem>*/ {
     readonly ClassID: ClassNames | string;
     readonly ID: string;
 
     IsSameSignature<T extends IGameObject>(object: T): boolean;
-    Update(dt: Time): void;
 }
 
 export abstract class GameObject
@@ -49,10 +49,14 @@ export abstract class GameObject
     @Expose()
     public readonly ID: string;
 
+    @Exclude()
+    public readonly Engine: nerdEngine | null;
+
     protected constructor(engine: nerdEngine | null, classID: ClassNames | string, id: string) {
         this.ClassID = classID ?? "@GameObject.ClassID";
         this.ID = id ?? "@GameObject.ID";
 
+        this.Engine = engine;
         if (engine) {
             engine.Storage.GameObjects.AddItem(this);
         }

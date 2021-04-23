@@ -1,7 +1,7 @@
 /**
  * @return {number}
  */
-import {Float, RawFloat} from "../data";
+import { Float, RawFloat, Vector2 } from "../data";
 import {RGB255} from "./utilsColor";
 import {Time} from "../data";
 import {Interval} from "../data";
@@ -82,67 +82,6 @@ export function GetFullNumberStr(x: number): string {
     return output;
 }
 
-/*
-function CalculateBuy(money: number, level: number, priceFirst: number, priceChange: number, count: number, debug = false)
-    : {spent: number, levels: number, price: number} {
-    const result = {
-        spent: 0,
-        levels: 0,
-        price: 0,
-    };
-
-    const oldUpgradesCost = GetSum(priceFirst, priceChange, level - 1);
-    const totalSum = oldUpgradesCost + money;
-
-    let canBuyCount;
-    if (count < 0) {
-        canBuyCount = GetSumN(priceFirst, priceChange, totalSum);
-    } else {
-        canBuyCount = Math.min(level - 1 + count, GetSumN(priceFirst, priceChange, totalSum));
-    }
-
-    const canBuyCost = GetSum(priceFirst, priceChange, canBuyCount);
-    result.spent = canBuyCost - oldUpgradesCost);
-    result.levels = canBuyCount - (level - 1));
-    result.price = GetElement(priceFirst, priceChange, level + result.levels));
-
-    if (result.levels > 0) {
-        // lol
-    } else {
-        if (debug) console.log('Cant buy anything\n');
-        result.levels = 0;
-        result.price = 0;
-        result.spent = 0;
-    }
-
-    return result;
-}
-
-function GetSumN(a: number, d: number, s: number): number {
-    const x11 = Math.pow(2 * a - d, 2);
-    const x12 = (8 * d * s);
-    const x1 = x11 + x12;
-    const x2 = 2 * a - d;
-    const x3 = 2 * d;
-    return Math.floor((Math.sqrt(x1) - x2) / x3);
-}
-
-function GetSum(a: number, d: number, n: number): number {
-    return ((2 * a + d * (n - 1)) / 2) * n;
-}
-
-function GetElement(a: number, d: number, n: number): number {
-    return a + d * (n - 1);
-}
-
-function GetSumInterval(a: number, d: number, n1: number, n2: number): number {
-    const s1 = ((2 * a + d * ((n1 - 1) - 1)) / 2) * (n1 - 1);
-    const s2 = ((2 * a + d * (n2 - 1)) / 2) * n2;
-    return s2 - s1;
-}
-*/
-
-
 export function Clamp(value: number, interval: Interval, inclusive: boolean = true): number {
     if (inclusive) {
         return Math.min(Math.max(value, interval.Min), interval.Max);
@@ -159,13 +98,13 @@ export function GetDateDifferenceMs(date1: Date | string, date2: Date | string =
     return Math.abs(date1.getTime() - date2.getTime())
 }
 
-export function GetElapsedTimeMs(duration: Time | number, date1: Date, date2: Date = new Date()): number {
-    if (typeof duration == "number") {
-        duration = Time.FromMs(duration);
+export function GetElapsedTimeMs(durationMs: Time | number, date1: Date, date2: Date = new Date()): number {
+    if (typeof durationMs == "number") {
+        durationMs = Time.FromMs(durationMs);
     }
 
     let diff = GetDateDifferenceMs(date1, date2);
-    return duration.TotalMs.Minus(diff).AsNumber;
+    return durationMs.TotalMs.Minus(diff).AsNumber;
 }
 
 export function GetDateDifferenceTime(date1: Date | string, date2?: Date | string): Time {
@@ -174,4 +113,24 @@ export function GetDateDifferenceTime(date1: Date | string, date2?: Date | strin
     if (typeof date2 == "string") date2 = new Date(date2);
 
     return Time.FromMs(Math.abs(date2.getTime() - date1.getTime()));
+}
+
+export function TryParseInt(str: string, defaultValue: number) {
+    let retValue = defaultValue;
+    if (str !== null) {
+        if (str.length > 0) {
+            if (!isNaN(parseInt(str))) {
+                retValue = parseInt(str);
+            }
+        }
+    }
+    return retValue;
+}
+
+export function Distance(x1: number, y1: number, x2: number, y2: number) {
+    return Math.sqrt((x1 - x2) ** 2 + (y1 - y2) ** 2);
+}
+
+export function DistanceVec(pos1: Vector2, pos2: Vector2) {
+    return Math.sqrt((pos1.X - pos1.Y) ** 2 + (pos2.X - pos2.Y) ** 2);
 }
