@@ -4,6 +4,8 @@ import Vector2 = Phaser.Math.Vector2;
 import { Component } from "../components/Component";
 import { Constants } from "../../utils/Constants";
 import { GameScene } from "../../scenes/GameScene";
+import { angleToVector2 } from "../../utils/helpers/MathHelper";
+import { ClassConstructor, GameEvent } from "../../../nerdEngine";
 
 
 export abstract class Creature extends Phaser.Physics.Arcade.Sprite {

@@ -1,4 +1,4 @@
-import { angleToVector2 } from "../../../utils/MathHelper";
+import { angleToVector2 } from "../../../utils/helpers/MathHelper";
 import { Projectile } from "../Projectile";
 
 export function BasicBulletBehavior(projectile: Projectile, delta: number): void {

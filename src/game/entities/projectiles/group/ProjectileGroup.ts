@@ -1,13 +1,12 @@
-import { ProjectileConfig } from "../ProjectileConfig";
+import { BasicBullet, ProjectileConfig } from "../ProjectileConfig";
 import { Scene } from "phaser";
-import { TextureId } from "../../../managers/registers/ResourceRegister";
 import { Projectile } from "../Projectile";
-import { Game } from "../../../../app";
 import { EntityGroup } from "../../EntityGroup";
+import { TextureId } from "../../../registry/enums/TextureId";
 
 export class ProjectileGroup extends EntityGroup {
 
-    constructor(scene: Scene, quantity: number = 10, config: ProjectileConfig = Game.Content.weapons.bullets.basic) {
+    constructor(scene: Scene, quantity: number = 10, config: ProjectileConfig = BasicBullet) {
         super(scene);
 
         this.createCallback = item => {

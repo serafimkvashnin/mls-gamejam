@@ -1,8 +1,3 @@
-import Size = Phaser.Structs.Size;
-import { Game } from "../../../app";
-import Vector2 = Phaser.Math.Vector2;
-import Color = Phaser.Display.Color;
-import Tween = Phaser.Tweens.Tween;
 import { UIScene } from "./UIScene";
 import { SceneId } from "../../registry/enums/SceneId";
 import { GameScene } from "../GameScene";

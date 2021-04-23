@@ -2,12 +2,11 @@ import { ProjectileGroup } from "../../projectiles/group/ProjectileGroup";
 import { RangeWeaponConfig } from "./RangeWeaponConfig";
 import { Weapon } from "../Weapon";
 import { Creature } from "../../creatures/Creature";
-import { angleToVector2 } from "../../../utils/MathHelper";
-import { TextureId } from "../../../managers/registers/ResourceRegister";
 import { Constants } from "../../../utils/Constants";
-import { GameScene } from "../../../scenes/game/GameScene";
-import { Vector2 } from "../../../../nerdEngine";
-import { Layers } from "../../../utils/Layers";
+import { GameScene } from "../../../scenes/GameScene";
+import { TextureId } from "../../../registry/enums/TextureId";
+import { LayerId } from "../../../registry/enums/LayerId";
+import { angleToVector2 } from "../../../utils/helpers/MathHelper";
 
 export class RangeWeapon extends Weapon {
     public config: RangeWeaponConfig;
@@ -25,7 +24,7 @@ export class RangeWeapon extends Weapon {
         this.projectileGroup = projectileGroup ?? new ProjectileGroup(this.scene);
 
         this.muzzleFlash = this.scene.add.image(this.x, this.y, TextureId.MuzzleFlash);
-        this.muzzleFlash.setDepth(Layers.Front);
+        this.muzzleFlash.setDepth(LayerId.Front);
         this.muzzleFlash.setVisible(false);
     }
 

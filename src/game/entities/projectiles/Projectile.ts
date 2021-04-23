@@ -1,10 +1,10 @@
 import { Entity } from "../Entity";
 import { ProjectileConfig } from "./ProjectileConfig";
 import { GameEvent } from "../../../nerdEngine/components";
-import { TextureId } from "../../managers/registers/ResourceRegister";
 import { Creature } from "../creatures/Creature";
-import { Layers } from "../../utils/Layers";
-import { GameScene } from "../../scenes/game/GameScene";
+import { GameScene } from "../../scenes/GameScene";
+import { TextureId } from "../../registry/enums/TextureId";
+import { LayerId } from "../../registry/enums/LayerId";
 
 export abstract class Projectile extends Entity {
     public readonly onDeath: GameEvent<Projectile, { from: Creature | Entity }>;
@@ -21,7 +21,7 @@ export abstract class Projectile extends Entity {
         // console.log(this.height); for first 10 proj returns 12 than 32
         this.scene.physics.add.existing(this).setSize(this.height, this.height);
         
-        this.depth = Layers.Projectiles;
+        this.depth = LayerId.Projectiles;
     }
 
     public reset(x: number, y: number, rotation: number, config: ProjectileConfig): void {

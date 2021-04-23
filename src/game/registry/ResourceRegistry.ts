@@ -1,6 +1,6 @@
 import { TextureId } from "./enums/TextureId"
-import { ImageResource } from "../utils/resources/ImageResource"
-import { SpriteSheetResource } from "../utils/resources/SpriteSheetResource"
+import { ImageResource } from "../resources/ImageResource"
+import { SpriteSheetResource } from "../resources/SpriteSheetResource"
 
 
 export class ResourceRegistry {

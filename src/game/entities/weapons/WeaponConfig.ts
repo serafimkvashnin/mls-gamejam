@@ -1,5 +1,6 @@
-import { SoundId, TextureId } from "../../managers/registers/ResourceRegister";
 import { GameData } from "../../../nerdEngine/data";
+import { SoundId } from "../../registry/enums/SoundId";
+import { TextureId } from "../../registry/enums/TextureId";
 
 export interface WeaponConfig {
     textureId: TextureId;

@@ -36,11 +36,6 @@ export class LoaderScene extends Phaser.Scene {
                 console.log(`sources: ${texture.source.length}, scale mode: ${texture.source[0].scaleMode}`);
                 texture.source[0].scaleMode = 0;
             }, {});
-
-            this.sound.play(MusicId.Illset, {
-                volume: 0.3,
-                loop: true,
-            })
         });
 
         this.ResourceManager = new ResourceManager(this);

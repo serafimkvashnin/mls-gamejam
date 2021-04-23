@@ -1,10 +1,3 @@
-import Size = Phaser.Structs.Size;
-import { Game } from "../../../app";
-import Vector2 = Phaser.Math.Vector2;
-import Color = Phaser.Display.Color;
-import Tween = Phaser.Tweens.Tween;
-import { getMouseWorldPosition } from "../../utils/helpers/MouseHelper";
-import { SceneId } from "../../registry/enums/SceneId";
 import { IScene } from "../IScene";
 
 export abstract class UIScene<T extends IScene> extends Phaser.Scene {

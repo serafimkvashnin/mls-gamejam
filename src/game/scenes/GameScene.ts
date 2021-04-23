@@ -1,5 +1,6 @@
 import { Physics, Scene } from "phaser";
 import { IGameScene } from "./IGameScene";
+import { GameUIScene } from "./ui/GameUIScene";
 
 export class GameScene extends Scene implements IGameScene {
     private ui!: GameUIScene;

@@ -1,9 +1,9 @@
 import { Entity } from "../Entity";
 import { WeaponConfig } from "./WeaponConfig";
 import Transform = Phaser.GameObjects.Components.Transform;
-import { angleToVector2 } from "../../utils/MathHelper";
 import { Creature } from "../creatures/Creature";
-import { GameScene } from "../../scenes/game/GameScene";
+import { GameScene } from "../../scenes/GameScene";
+import { angleToVector2 } from "../../utils/helpers/MathHelper";
 
 export abstract class Weapon extends Entity {
     public config: WeaponConfig;

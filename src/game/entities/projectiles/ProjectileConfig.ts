@@ -1,8 +1,7 @@
-import { TextureId } from "../../managers/registers/ResourceRegister";
 import { BasicBulletBehavior } from "./behaviours/ProjectileBehavior";
-import { Game } from "../../../app";
 import { GameData } from "../../../nerdEngine/data";
 import { Projectile } from "./Projectile";
+import { TextureId } from "../../registry/enums/TextureId";
 
 export const BasicBullet: ProjectileConfig = {
     textureId: TextureId.Bullet,

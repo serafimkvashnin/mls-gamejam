@@ -1,21 +1,18 @@
 import 'reflect-metadata';
-import Phaser, { Scene } from "phaser";
 import GameConfig = Phaser.Types.Core.GameConfig;
 import {LoaderScene} from "./game/scenes/LoaderScene";
-import { nerdEngine } from "./nerdEngine";
 import { DataManager } from './nerdEngine/managers/dataManager';
 import { SaveMaker } from './nerdEngine/managers/saveSystem/saveMaker';
 import { LoadManager } from './nerdEngine/managers/saveSystem/loadManager';
 import { LoadedContentFixer } from './nerdEngine/managers/saveSystem/loadedContentFixer';
+import { nerdEngine } from './nerdEngine';
 
 export let NerdEngine: nerdEngine;
 export let PhaserEngine: GameEngine;
 //export let Game: GameManager;
 
-console.log(`Hello world!`);
-
 const config: Phaser.Types.Core.GameConfig = {
-    title: "Convoy Idle",
+    title: "Придумай название!",
     version: "0.0.1",
     width: 1920,
     height: 1080,

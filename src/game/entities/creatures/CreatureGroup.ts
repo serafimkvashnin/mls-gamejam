@@ -1,3 +1,4 @@
+import { GameEvent } from "../../../nerdEngine";
 import { GameScene } from "../../scenes/GameScene";
 import { Entity } from "../Entity";
 import { Creature } from "./Creature";

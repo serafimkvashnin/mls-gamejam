@@ -1,5 +1,6 @@
+import { ValuesOf } from "../../nerdEngine/utils/utilsObjects";
 import { ResourceRegistry } from "../registry/ResourceRegistry";
-import { Resource } from "../utils/resources/Resource";
+import { Resource } from "../resources/Resource";
 
 export class ResourceManager {
 
