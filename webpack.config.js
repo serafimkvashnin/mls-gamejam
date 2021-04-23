@@ -8,7 +8,7 @@ module.exports = {
     devtool: 'eval',
     entry: [
         './src/app.ts',
-        './src/template/styles.css',
+        //'./src/template/styles.css',
     ],
     module: {
         rules: [
@@ -30,7 +30,8 @@ module.exports = {
         ]
     },
     resolve: {
-        extensions: ['.ts', '.js']
+        extensions: ['.ts', '.js'],
+        fallback: { "crypto": false }
     },
     output: {
         filename: '[name].[contenthash].js',
@@ -38,7 +39,7 @@ module.exports = {
     },
     plugins: [
         new HtmlWebPackPlugin({
-            template: './src/template/index.html',
+            template: './src/index.html',
             filename: './index.html'
         }),
         new CleanWebpackPlugin(),

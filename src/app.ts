@@ -1,17 +1,16 @@
 import 'reflect-metadata';
 import Phaser, { Scene } from "phaser";
-import './style/main.css';
 import GameConfig = Phaser.Types.Core.GameConfig;
-import {TestScene} from "./game/scenes/game/TestScene";
 import {LoaderScene} from "./game/scenes/LoaderScene";
-import {SceneSelector} from "./game/managers/SceneSelector";
-import {TestSceneUI} from "./game/scenes/game/TestSceneUI";
 import { nerdEngine } from "./nerdEngine";
-import { GameManager } from "./game/managers/GameManager";
+import { DataManager } from './nerdEngine/managers/dataManager';
+import { SaveMaker } from './nerdEngine/managers/saveSystem/saveMaker';
+import { LoadManager } from './nerdEngine/managers/saveSystem/loadManager';
+import { LoadedContentFixer } from './nerdEngine/managers/saveSystem/loadedContentFixer';
 
 export let NerdEngine: nerdEngine;
 export let PhaserEngine: GameEngine;
-export let Game: GameManager;
+//export let Game: GameManager;
 
 console.log(`Hello world!`);
 
@@ -31,8 +30,8 @@ const config: Phaser.Types.Core.GameConfig = {
 
     scene: [
         LoaderScene,
-        TestScene,
-        TestSceneUI,
+        // TestScene,
+        // TestSceneUI,
     ],
 
     backgroundColor: "#6495ed",
@@ -53,48 +52,66 @@ const config: Phaser.Types.Core.GameConfig = {
 
 export class GameEngine extends Phaser.Game {
 
-    public readonly SceneSelector: SceneSelector;
+    //public readonly SceneSelector: SceneSelector;
     public readonly Random: Phaser.Math.RandomDataGenerator;
 
     constructor(config: GameConfig) {
         super(config);
 
-        this.SceneSelector = new SceneSelector(this);
+        //this.SceneSelector = new SceneSelector(this);
         this.Random = new Phaser.Math.RandomDataGenerator();
         Phaser.Display.Canvas.Smoothing.disable(this.context); //note ни на что не влияет вообще))
         //Phaser.Display.Canvas.CanvasInterpolation.setCrisp(this.canvas); //note буквально тоже самое что pixelArt: true
     }
 }
 
-export function StartGame(isLoading: boolean) {
-    NerdEngine.Reset();
-    //NerdEngine.ResetContent();
-    Game = new GameManager(NerdEngine);
-    (<any>window).Game = Game;
-    NerdEngine.LoadModules();
+let loadManager: LoadManager;
 
-    NerdEngine.Events.OnContentLoaded.Register(() => {
-        console.log(`OnContentLoaded event`);
-    })
+export function InitEngine() {
+    NerdEngine = new nerdEngine({
+        gameName: "DualForce Idle",
+        buildMode: "Preview",
+        saveMaker: (engine: nerdEngine) => new SaveMaker(engine), //todo хуйня какая-то если честно,
+        loadManager: (engine: nerdEngine, contentFixer?: LoadedContentFixer) => {
+            if (!loadManager) {
+                loadManager = new LoadManager(engine, contentFixer)
+            }
+            loadManager.Engine = engine;
 
-    if (!isLoading) {
-        NerdEngine.OnContentLoaded();
-    }
+            if (contentFixer) {
+                loadManager.ContentFixer = contentFixer;
+            }
+
+            loadManager.Reset();
+            return loadManager;
+        },
+
+        fileSystem: new DataManager(),
+        platform: "None",
+
+        contentInitCallback: () => {
+
+        },
+        contentResetCallback: () => {
+            
+        },
+
+        customTypes: () => ({
+
+        }),
+    });
+
+    console.log(`Engine initiated`);
 }
 
 window.addEventListener("load", () => {
     PhaserEngine = new GameEngine(config);
+    InitEngine();
 
     (<any>window).PhaserEngine = PhaserEngine;
     console.log(`[DevInfo] Use 'PhaserEngine' to access Phaser`);
 
-    NerdEngine = new nerdEngine({
-        gameName: "Pew pew pew Idle",
-        gameVersion: "pre alpha pre beta 0.1",
-        buildMode: "Preview",
-        contentInitCallback: () => StartGame(false),
-        contentResetCallback: () => StartGame(true),
-    });
+
 
     (<any>window).Nerd = NerdEngine;
     console.log(`[DevInfo] Use 'Nerd' to access nerdEngine`);
