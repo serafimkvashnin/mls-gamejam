@@ -1,5 +1,5 @@
 ///<reference path="../valueCalc.ts"/>
-import {Float, RawFloat, RawFloatValue} from "../../data";
+import {Float, RawFloat, RawFloatValue} from "../../data/float";
 import {Progression, ProgType} from "../progression";
 import {ValueCalc} from "../valueCalc";
 

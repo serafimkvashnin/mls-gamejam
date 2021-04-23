@@ -2,15 +2,10 @@ import {ObjectStorage} from "../data/objectStorage";
 import {Unlock} from "../logic";
 import {UnlockUpgrade} from "../logic/upgrade";
 import { nerdEngine } from "../nerdEngine";
-import { Exclude } from "class-transformer";
-import { GameEvent } from "../components";
 
-@Exclude()
+export type AfterModuleLoaded<T> = (module: ContentModule<T>, content: T) => void;
+
 export class ContentModule<T> {
-    public readonly Events = {
-        OnLoaded: new GameEvent<ContentModule<any>, { content: any }>()
-    }
-
     public readonly ModuleStorage: ObjectStorage<ContentModule<any>>
 
     private isLoaded: boolean = false;
@@ -18,12 +13,15 @@ export class ContentModule<T> {
     public readonly ID: string;
     public readonly ClassID: string = "Module";
     private readonly LoadContent: () => T;
+    private readonly afterContentLoaded?: () => void; //AfterModuleLoaded<T>;
 
-    constructor(engine: nerdEngine, id: string, load: () => T, autoAdd: boolean = true)
+    constructor(engine: nerdEngine, id: string, load: () => T, autoAdd: boolean = true,
+                afterContentLoaded?: () => void)
     {
         this.ModuleStorage = engine.Storage.Modules;
         this.ID = id;
         this.LoadContent = load;
+        this.afterContentLoaded = afterContentLoaded;
 
         this.content = null;
 
@@ -63,7 +61,7 @@ export class ContentModule<T> {
             this.isLoaded = true;
             this.content = this.LoadContent();
 
-            this.Events.OnLoaded.Trigger(this, { content: this.content });
+            if (this.afterContentLoaded) this.afterContentLoaded(/*this, this.content*/);
 
             if (!this.content) throw new Error(`Module '${this.ID}': LoadContent() returned null`);
          }

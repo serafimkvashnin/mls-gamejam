@@ -6,11 +6,11 @@ import Size = Phaser.Structs.Size;
 import Color = Phaser.Display.Color;
 import { Float, RawFloat } from "../../../../nerdEngine/data";
 import { GameButton } from "../../../gui/button/GameButton";
-import { NumberToString, TimeToString } from "../../../../nerdEngine/utils/utilsText";
 import { Upgrade } from "../../../../nerdEngine/logic/upgrade";
 import { GUIContainer } from "../../../gui/GUIContainer";
 import { GUIStyles } from "../styles/GameMapUIStyles";
 import { TweakValueType } from "../../../../nerdEngine/logic/tweak";
+import { NumberToString, TimeToString } from "../../../../nerdEngine/utils/utilsText";
 
 export type UpgradeInfoConfig = {
     scene: Scene,

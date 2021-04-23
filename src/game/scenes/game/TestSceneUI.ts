@@ -155,12 +155,11 @@ export class TestSceneUI extends Phaser.Scene {
         this.upgradesMenu.add([ this.speedUpgradeInfo, this.reloadTimeUpgradeInfo ]);
         this.upgradesMenu.setVisible(false);
 
-        // Game.Engine.Loading.restartToLoadCallback = (loadManger => {
-        //     Game.Engine.Reset();
-        //     Game.Engine.ResetContent();
-        //     this.owner.scene.restart();
-        // })
-
+        Game.Engine.Loading.restartToLoadCallback = (loadManger => {
+            Game.Engine.Reset();
+            Game.Engine.ResetContent();
+            this.owner.scene.restart();
+        })
         this.resetButton = new GameButton({
             scene: this,
             size: new Size(220, 80),

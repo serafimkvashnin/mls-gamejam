@@ -1,29 +1,18 @@
 import {Tweak} from "./tweak";
-import { Float, RawFloat } from "../../data";
+import {Float, RawFloat} from "../../data";
 import {Type} from "class-transformer";
 import {UniqArray} from "../../data";
 import {AsArray} from "../../utils/utilsObjects";
 
 export class TweakArray {
-    // public readonly Events = {
-    //     AnyGameDataValueChanged: new GameEvent<TweakArray, { tweak: Tweak, gameData: GameData }>(),
-    // }
-
     public readonly classID: string;
 
-    //todo use ReadOnlyArray
     @Type(() => Tweak)
     private tweaks: UniqArray<Tweak>;
 
     constructor(tweaks?: Tweak | Tweak[], checkForUniq: boolean = true) {
         this.classID = this.constructor.name;
         this.tweaks = new UniqArray<Tweak>(AsArray(tweaks), Tweak.IsEqualUID);
-
-        // this.tweaks.Items.forEach(item => {
-        //     item.Events.AnyGameDataValueChanged.Register((sender, args) => {
-        //         this.Events.AnyGameDataValueChanged.Trigger(this, { tweak: sender, gameData: args.gameData });
-        //     });
-        // });
     }
 
     Reset() {
@@ -39,15 +28,6 @@ export class TweakArray {
 
     get Items(): Tweak[] {
         return this.tweaks.Items;
-    }
-
-    get Targets() {
-        let targets = [];
-        for (const tweak of this.Items) {
-            targets.push(...tweak.TargetList);
-        }
-
-        return targets;
     }
 
     Upgrade(count: RawFloat) {

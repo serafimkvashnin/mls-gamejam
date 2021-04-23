@@ -3,6 +3,7 @@ import {AsArray} from "../utils/utilsObjects";
 export type IsEqualCompare<T> = (a: T, b: T) => boolean
 
 export class UniqArray<T> {
+
     private readonly key?: string;
     private items: T[];
     private readonly isEqual: IsEqualCompare<T>;

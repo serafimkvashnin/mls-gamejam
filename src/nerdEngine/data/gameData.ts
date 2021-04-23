@@ -17,8 +17,7 @@ export class GameDataStatistics {
 
 export class GameData implements IStorageItem {
     public readonly Events = {
-        OnRecomputed: new GameEvent<GameData, { prevValue: Float, newValue: Float }>(),
-        OnBaseValueChanged: new GameEvent<GameData, { prevValue: Float, newValue: Float }>(),
+        OnChanged: new GameEvent<GameData, { value: Float }>(),
     }
 
     public readonly ID: string;
@@ -74,9 +73,7 @@ export class GameData implements IStorageItem {
     }
 
     set BaseValue(newValue: Float) {
-        const prevValue = this.baseValue;
         this.baseValue = new Float(newValue);
-        this.Events.OnBaseValueChanged.Trigger(this, { prevValue, newValue });
         this.recomputeValue();
     }
 
@@ -99,36 +96,27 @@ export class GameData implements IStorageItem {
     }
 
     private recomputeValue(): void {
-        let newValue = this.GetValueWithTweaks(this.TweakArray.Items);
-        newValue = this.FixValue(newValue);
-
-        if (newValue.IsLess(this.Statistics.SmallestValue)) {
-            this.Statistics.SmallestValue = newValue;
-        }
-
-        if (newValue.IsMore(this.Statistics.BiggestValue)) {
-            this.Statistics.BiggestValue = newValue;
-        }
-
-        const prevValue = this.computedValue;
-        this.computedValue = newValue;
-
-        this.Events.OnRecomputed.Trigger(this, { prevValue, newValue });
-    }
-
-    private FixValue(value: Float): Float {
-        let newValue = value;
+        let value = this.GetValueWithTweaks(this.TweakArray.Items);
         if (this.MinMaxLimit) {
             if (this.MinMaxLimit[0]) {
-                newValue = Float.Max(this.MinMaxLimit[0], newValue);
+                value = Float.Max(this.MinMaxLimit[0], value);
             }
 
             if (this.MinMaxLimit[1]) {
-                newValue = Float.Min(this.MinMaxLimit[1], newValue);
+                value = Float.Min(this.MinMaxLimit[1], value);
             }
         }
 
-        return newValue;
+        if (value.IsLess(this.Statistics.SmallestValue)) {
+            this.Statistics.SmallestValue = value;
+        }
+
+        if (value.IsMore(this.Statistics.BiggestValue)) {
+            this.Statistics.BiggestValue = value;
+        }
+
+        this.computedValue = value;
+        this.Events.OnChanged.Trigger(this, { value });
     }
 
     GetValueWithoutTweaks(tweaksToExclude: Tweak[]): Float {
@@ -153,7 +141,6 @@ export class GameData implements IStorageItem {
             }
         }
 
-        value = this.FixValue(value);
         return value;
     }
 
@@ -168,12 +155,10 @@ export class GameData implements IStorageItem {
             this.TweakArray.Items.push(tweak);
             this.TweakArray.SortTweaks();
             this.recomputeValue();
-        }
-        else {
+        } else {
             if (update && this.HasTweakUID(tweak)) {
                 this.UpdateTweak(tweak);
-            }
-            else {
+            } else {
                 throw new Error(`Tweak with id: ${tweak.ID} is already exists in GameData: ${this.ID}`);
             }
         }

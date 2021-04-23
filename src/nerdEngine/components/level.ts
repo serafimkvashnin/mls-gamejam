@@ -10,7 +10,7 @@ export class Level {
     @Type(() => GameData)
     private readonly valueMaxData: GameData | null;
 
-    constructor(value: RawFloat, valueMax: RawFloat | null) {
+    constructor(value: RawFloat = 0, valueMax: RawFloat | null = null) {
         this.value = new Float(0);
         this.Value = new Float(value);
 

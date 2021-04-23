@@ -1,14 +1,12 @@
 import { Exclude, Type } from "class-transformer";
 import { nerdEngine } from "../../nerdEngine";
 import { PriceArray } from "../price";
-import { GameEvent, Level } from "../../components";
+import { Level } from "../../components";
 import { TweakArray } from "../tweak";
 import { Upgrade, UpgradeClassID } from "./upgrade";
 import { Unlock } from "../unlock";
 
 export class UnlockUpgrade extends Upgrade  {
-
-    public readonly OnUnlocked = new GameEvent<UnlockUpgrade, { }>();
 
     @Exclude()
     @Type(() => Unlock)
@@ -18,10 +16,7 @@ export class UnlockUpgrade extends Upgrade  {
                 unlock: Unlock, priceArray: PriceArray, isThemeUnlocked: boolean = false)
     {
         super(engine, id, null, new Level(0, 1),
-            priceArray, new TweakArray([]), () => {
-                unlock.Toggle(true)
-                this.OnUnlocked.Trigger(this, {});
-            },
+            priceArray, new TweakArray([]), () => unlock.Toggle(true),
             isThemeUnlocked);
 
         this.subClassID = UpgradeClassID.UnlockUpgrade;

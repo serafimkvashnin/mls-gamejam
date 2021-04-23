@@ -1,6 +1,6 @@
 import {Float, RawFloat} from "./float";
 import {Type} from "class-transformer";
-import {UniqueID} from "../components";
+import {UniqueID} from "../components/uniqueID";
 import {IStorageItem} from "./objectStorage";
 
 //todo implements ISerializable?
@@ -54,8 +54,8 @@ export class Time implements IStorageItem {
         return this.TotalMinutes.Divide(60);
     }
 
-    get TotalDays(): Float {
-        return this.TotalHours.Divide(24);
+    Set(time: Time) {
+        this.milliseconds = time.TotalMs;
     }
 
     Add(time: Time) {

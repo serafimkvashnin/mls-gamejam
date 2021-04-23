@@ -3,15 +3,11 @@ import {IStringConvertible} from "../interfaces";
 import {Exclude} from "class-transformer";
 import { nerdEngine } from "../nerdEngine";
 import { ValueValidator } from "../tools/valueValidator";
-import { GameEvent } from "../components";
 
 export type SettingOnValueChanged<T> = (setting: Setting<T>, value: T) => void;
 export type SettingOnContentLoaded<T> = (setting: Setting<T>, value: T) => void;
 
 export class Setting<T extends IStringConvertible> extends GameObject {
-    public readonly Events = {
-        OnChanged: new GameEvent<Setting<T>, { prev: T, value: T }>(),
-    }
 
     private value!: T;
     public readonly DefaultValue: T;
@@ -50,14 +46,11 @@ export class Setting<T extends IStringConvertible> extends GameObject {
 
     set Value(newValue: T) {
         if (this.Validator.IsValueCorrect(newValue)) {
-            const prev = this.value;
             this.value = this.Validator.CorrectValue(newValue);
 
             if (this.OnValueChanged) {
                 this.OnValueChanged(this, newValue);
             }
-
-            this.Events.OnChanged.Trigger(this, { prev, value: this.value });
         }
         else {
             throw new Error(`Trying to set not possible value: ${newValue} for option: ${this.ID}`);

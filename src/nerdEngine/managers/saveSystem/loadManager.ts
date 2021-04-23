@@ -1,12 +1,16 @@
-import { deserialize, Exclude, plainToClass } from "class-transformer";
-import { ClassNames, Container, GameObject, IGameObject, Timer, Upgrade } from "../../logic";
+//todo actually i think it can be good better way to do it in actual save manager, like ISaveType with Load func, dunno..
+
 import { IGameLoadInfo, SlotGameLoadInfo, StringGameLoadInfo } from "./loadInfo";
+import { LoadedContentFixer } from "./index";
+import { GameEvent } from "../../components";
+import { ClassNames, Container, GameObject, IGameObject, Timer, Upgrade } from "../../logic";
+import { deserialize, Exclude, plainToClass } from "class-transformer";
+import { IsObject, ValuesOf } from "../../utils/utilsObjects";
+
+import { CurrentTimeStr } from "../../utils/utilsText";
 import { nerdEngine } from "../../nerdEngine";
 import { SaveData } from "./saveManager";
-import { IsObject, ValuesOf } from "../../utils/utilsObjects";
-import { LoadedContentFixer } from "./loadedContentFixer";
-import { GameEvent } from "../../components";
-import { CurrentTimeStr } from "../../utils/utilsText";
+import { ClassConstructor } from "../../data";
 
 export type LoadResult = {
     IsError: boolean,
@@ -38,14 +42,10 @@ export class LoadManager {
         OptionalActionsStage: ((currentItem: IGameObject | undefined, item: IGameObject) => void)[],
     }
 
-    /**
-     * You can set ContentFixed when you want. So if you need loaded content in it, you can
-     * manually call it before calling LoadGame/OnContentLoaded
-     */
-    public ContentFixer: LoadedContentFixer;
-    public readonly SlotName: string;
-    public readonly Backup1SlotName: string;
-    public readonly Backup2SlotName: string;
+    //todo вообще не обязательно делать всё ридонли и передавать только через конструктор!
+    public restartToLoadCallback?: (loadManger: LoadManager) => void;
+
+    public readonly ContentFixer: LoadedContentFixer;
 
     private loadID: number = 0;
 
@@ -55,35 +55,23 @@ export class LoadManager {
     private isSkippingNextLoad: boolean = false;
     private lastLoadInfo?: IGameLoadInfo = undefined;
 
-    public readonly DoLogs: boolean;
-
     //todo КАРОЧЕ. можно сделать кастомную функцию инициализации контента в nerdEngine, которая будет настраиваться
     // но вызываться будет в движке, и там же будет функция ресета контента которую будет вызывать лоад менеджер
 
     /**
      * @param Engine
      * @param contentFixer
+     * @param customTypes
      * @param slotName SlotName is combined with Engine.GameName (TODO, option to do this maybe?)
      */
-    constructor(public Engine: nerdEngine, contentFixer?: LoadedContentFixer, slotName: string = "Save1")
+    constructor(public readonly Engine: nerdEngine, contentFixer?: LoadedContentFixer)
     {
-        this.DoLogs = false; //todo: TEMP
         this.ContentFixer = contentFixer ?? new LoadedContentFixer(Engine);
-
-        this.SlotName = slotName;
-        this.Backup1SlotName = slotName + "_backup1";
-        this.Backup2SlotName = slotName + "_backup2";
 
         this.CustomLoadHandlers = {
             PlainToClassStage: [],
             InitFromStage: [],
             OptionalActionsStage: [],
-        }
-    }
-
-    ResetEvents() {
-        for (const event of ValuesOf(this.Events)) {
-            event.ClearObservers();
         }
     }
 
@@ -129,12 +117,14 @@ export class LoadManager {
     //todo async?
     RestartToLoad() {
         //todo LoadManager.IsLoading check?
-
+        if (this.restartToLoadCallback) {
+            this.restartToLoadCallback(this);
+        }
         this.LoadGame()
     }
 
     protected OnLoadFinished() {
-        if (this.DoLogs) console.log(`[SaveManager] Load finished, increasing LoadID (${this.loadID} -> ${this.loadID + 1})`);
+        console.log(`[SaveManager] Load finished, increasing LoadID (${this.loadID} -> ${this.loadID + 1})`);
         this.loadID++;
     }
 
@@ -151,10 +141,6 @@ export class LoadManager {
     }
 
     //todo возвращать деньги, за все грейды, которые были убраны в новом апдейте, но остались в сейве
-    /**
-     * Use it instead of OnContentLoaded(), when you have save data to load. It will call OnContentLoaded()
-     * automatically when the loading finished
-     */
     async LoadGame() {
         try {
             if (this.IsSkippingNextLoad) {
@@ -163,11 +149,13 @@ export class LoadManager {
                 this.loadType = undefined;
                 this.isLoading = false;
                 this.loadInfo = undefined;
+
+                this.Engine.ResetContent();
             }
             else {
                 if (!this.IsLoading) throw new Error(`Flag 'IsLoading' was not set!`);
                 if (!this.loadInfo) throw new Error(`LoadInfo was not set!`);
-                
+
                 const saveDataOrResult = await this.loadInfo.GetSaveData();
 
                 if (typeof saveDataOrResult == "string") {
@@ -176,8 +164,7 @@ export class LoadManager {
                 else {
                     if (saveDataOrResult.IsError) {
                         throw saveDataOrResult.Error;
-                    }
-                    else {
+                    } else {
                         console.log(saveDataOrResult.Output);
                     }
                 }
@@ -192,67 +179,38 @@ export class LoadManager {
             this.OnLoadFinished();
         }
         catch (e) {
-            this.Engine.System.SetGameCrashed(true, {
-                error: e,
-                message: "Game load error"
-            });
+            this.Engine.System.IsGameCrashed = true;
 
-            this.ResetLoadInfo();
+            this.Reset();
             console.error(e);
         }
-
     }
 
-    ResetLoadInfo() {
+    Reset() {
         this.loadType = undefined;
         this.isLoading = false;
         this.loadInfo = undefined;
     }
 
-    ResetCustomLoadHandlers() {
-        this.CustomLoadHandlers.PlainToClassStage = [];
-        this.CustomLoadHandlers.InitFromStage = [];
-        this.CustomLoadHandlers.OptionalActionsStage = [];
-    }
-
-    /**
-     * Reset CustomLoadHandlers and Events
-     */
-    Reset() {
-        this.ResetCustomLoadHandlers();
-        this.ResetEvents();
-    }
-
-    async EraseSlot(slotName: string = this.SlotName, eraseBackups = true) {
-        await this.Engine.Data.RemoveItem(slotName);
-
-        if (eraseBackups) {
-            await this.Engine.Data.RemoveItem(slotName + "_backup1");
-            await this.Engine.Data.RemoveItem(slotName + "_backup2");
-        }
-
-        if (this.DoLogs) console.log(`[SaveSystem] Slot '${slotName}' was erased, backups erased: ${eraseBackups}`);
-    }
-
     private async LoadSaveData(saveData: string) {
+        //await Construct3.callFunction("DoTick");
         //todo save version id, for ability to do some version specific migration
 
         //todo надо сделать систему Aliases, чтобы когда выходит новый апдейт, нормально загружались грейды которые были
         // переименованы
 
         //todo лучше сделать SaveManager.IsGameLoading или типо того
-        if (this.DoLogs) console.log(`${CurrentTimeStr()} [LoadGame] Game loading started..`);
+        //Game.System.IsContentLoaded = false;
+        console.log(`${CurrentTimeStr()} [LoadGame] Game loading started..`);
 
         const deserializedSaveData = deserialize<SaveData>(SaveData, saveData);
 
-        if (this.DoLogs) console.log(`[LoadGame] Deserialized ${deserializedSaveData.Items.length} objects with data`);
+        console.log(`[LoadGame] Deserialized ${deserializedSaveData.Items.length} objects with data`);
         this.Events.OnLoadDeserializationCompleted.Trigger(this, {saveData: deserializedSaveData});
 
         const classifiedItems: GameObject[] = [];
         const classifiedTimers: Timer[] = [];
-        if (this.DoLogs) console.log(`${CurrentTimeStr()} [LoadGame] Data deserialize finished!`);
-
-        const currentItems = this.Engine.Storage.GameObjects.Items.slice(0);
+        console.log(`${CurrentTimeStr()} [LoadGame] Data deserialize finished!`);
 
         // Stage 1: Init (just convert plain object to classes)
 
@@ -280,17 +238,16 @@ export class LoadManager {
 
         this.Events.OnLoadStage1Completed.Trigger(this, {gameObjects: classifiedItems, timers: classifiedTimers});
 
-        if (this.DoLogs) console.log(`${CurrentTimeStr()} [LoadGame] Stage #1 completed!`);
+        console.log(`${CurrentTimeStr()} [LoadGame] Stage #1 completed!`);
 
         // Stage 2: Merge save data to current content
-
         for (const item of classifiedItems) {
             const currentItem = this.Engine.Storage.GameObjects.Items.find((obj) => obj.IsSameSignature(item));
 
             if (currentItem) {
                 currentItem.InitFrom(this.Engine, item);
             } else {
-                if (this.DoLogs) console.log(`${CurrentTimeStr()} No item found to replace for ${item.ClassID} - ${item.ID}`);
+                console.log(`${CurrentTimeStr()} No item found to replace for ${item.ClassID} - ${item.ID}`);
 
                 switch (item.ClassID) {
                     //todo SubClassID??
@@ -303,11 +260,12 @@ export class LoadManager {
             }
 
             this.CustomLoadHandlers.InitFromStage.forEach(callback => callback(currentItem, item));
+
             //Do i need to add old item? Because if there is nothing to replace, item was deleted in update
         }
 
         this.Events.OnLoadStage2Completed.Trigger(this, {gameObjects: classifiedItems, timers: classifiedTimers});
-        if (this.DoLogs) (`${CurrentTimeStr()} [LoadGame] Stage #2 completed!`);
+        console.log(`${CurrentTimeStr()} [LoadGame] Stage #2 completed!`);
 
         //todo Наверное лучше сделать этот этап для объектов, которые всё таки попали в контент?
         // а то смысла по сравнению со вторым этапом вообще нет
@@ -318,7 +276,6 @@ export class LoadManager {
         // надо как-то решить эту херню
         this.Engine.Events.OnContentLoaded.Register(() => {
             // Stage 3: Specific reinit
-            ///Stopwatches.Toggle("LoadManager::OnContentLoaded::Stage3");
             for (const item of classifiedItems) {
                 const currentItem = this.Engine.Storage.GameObjects.Items.find((obj) => obj.IsSameSignature(item));
 
@@ -326,15 +283,15 @@ export class LoadManager {
                     this.CustomLoadHandlers.OptionalActionsStage.forEach(callback => callback(currentItem, item));
                 }
             }
-            //Stopwatches.Toggle("LoadManager::OnContentLoaded::Stage3");
         });
 
-        if (this.DoLogs) console.log('[LoadGame] Stage #3 completed!');
-        //Stopwatches.Toggle('GameLoading');
+        console.log('[LoadGame] Stage #3 completed!');
+        //await Construct3.callFunction("DoTick");
     }
 
     GetClassByName(name: string): new (...args: any[]) => any {
         let typeList = this.Engine.GetTypeList();
+        //console.log(typeList);
         for (const _key in typeList) {
             let key = _key as keyof typeof typeList;
             let type = typeList[key];

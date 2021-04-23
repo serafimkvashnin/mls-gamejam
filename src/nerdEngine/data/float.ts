@@ -1,7 +1,14 @@
 import Decimal from "break_infinity.s.js";
 import {Type} from "class-transformer";
+import {ClassNames, IGameObject} from "../logic/gameObject";
+import {Time} from "./time";
+import { nerdEngine } from "../nerdEngine";
 
 export type RawFloat = Float | number | string;
+
+export function AsNumber(value: RawFloat) {
+    return RawFloatValue(value);
+}
 
 export function NewFloat(value: Float | number): Float {
     return new Float(value);
@@ -272,5 +279,52 @@ export class Float {
 
     Floor(): Float {
         return Float.Floor(this);
+    }
+}
+
+//todo нужен мне вообще этот класс?
+export class GameFloat extends Float implements IGameObject {
+    public readonly ClassID: ClassNames;
+    public readonly ID: string;
+
+    constructor(storage: nerdEngine | null, id: string, value: string | RawFloat) {
+        super(value);
+        this.ID = id;
+        this.ClassID = ClassNames.GameFloat;
+
+        if (storage) {
+            storage.Storage.GameObjects.AddItem(this);
+        }
+    }
+
+    //todo не должно быть так я думаю. надо сделать удобнее
+    IsSameSignature<T extends IGameObject>(object: T): boolean {
+        return `${this.ClassID}::${this.ID}` == `${object.ClassID}::${object.ID}`
+    }
+
+    InitUI() {}
+
+    get Value(): Float {
+        return this.GetValue();
+    }
+
+    set Value(value: Float) {
+        this.SetValue(value);
+    }
+
+    Add(value: RawFloat): void {
+        this.Value = this.Value.Plus(value);
+    }
+
+    Subtract(value: RawFloat): void {
+        this.Value = this.Value.Minus(value);
+    }
+
+    Update(_dt: Time): void {
+
+    }
+
+    InitFrom(engine: nerdEngine, _oldItem: GameFloat): void {
+        this.SetValue(_oldItem.GetValue());
     }
 }

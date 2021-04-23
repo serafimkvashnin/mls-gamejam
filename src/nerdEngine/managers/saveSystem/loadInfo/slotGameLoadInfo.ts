@@ -3,16 +3,16 @@ import LZString from "lz-string";
 import { LoadResult, LoadManager } from "../loadManager";
 
 export class SlotGameLoadInfo implements IGameLoadInfo {
-    constructor(public readonly SaveManager: LoadManager,
+    constructor(public readonly LoadManager: LoadManager,
                 //public readonly Slot: string,
                 public readonly IsCompressed: boolean) {}
 
     async GetSaveData(): Promise<string | LoadResult> {
         console.log('[SlotGameLoadInfo] Started to loading game from slot..');
 
-        const slotData = await this.SaveManager.Engine.Data.GetItem(this.SaveManager.SlotName);
-        const backup1 = await this.SaveManager.Engine.Data.GetItem(this.SaveManager.Backup1SlotName);
-        const backup2 = await this.SaveManager.Engine.Data.GetItem(this.SaveManager.Backup2SlotName);
+        const slotData = await this.LoadManager.Engine.Data.GetItem(this.LoadManager.Engine.Saving.SlotName);
+        const backup1 = await this.LoadManager.Engine.Data.GetItem(this.LoadManager.Engine.Saving.Backup1SlotName);
+        const backup2 = await this.LoadManager.Engine.Data.GetItem(this.LoadManager.Engine.Saving.Backup2SlotName);
 
         if (!slotData) {
             console.log(`[SlotGameLoadInfo] No data found in slot, trying to check backups..`);

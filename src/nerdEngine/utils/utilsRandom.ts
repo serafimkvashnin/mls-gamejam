@@ -1,4 +1,4 @@
-import {Float, RawFloat, RawFloatValue} from "../data";
+import {Float, RawFloat, RawFloatValue} from "../data/float";
 import { MersenneTwister19937, Random } from "random-js";
 
 //todo передавать в методе/классе объект рандома

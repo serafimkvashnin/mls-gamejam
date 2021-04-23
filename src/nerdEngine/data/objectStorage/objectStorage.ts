@@ -5,7 +5,6 @@ import { AsArray } from "../../utils/utilsObjects";
 export class ObjectStorage<StorageItemType extends IStorageItem> implements IStorage<StorageItemType> {
     private items: StorageItemType[];
 
-    //todo AllowSameNameAll, and AllowSameNameWithSameType
     public readonly AllowSameName: boolean;
 
     constructor(items?: StorageItemType[], allowSameName: boolean = false) {

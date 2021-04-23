@@ -4,15 +4,10 @@ import {Float, RawFloat} from "../data";
 import {Time} from "../data";
 import {Exclude, Expose, Type} from "class-transformer";
 import { nerdEngine } from "../nerdEngine";
-import { GameEvent } from "../components";
 
 export type OnTimerEvent = (timer: Timer) => void;
 
 export class Timer extends GameObject {
-
-    public readonly Events = {
-        OnTimer: new GameEvent<Timer, {}>(),
-    }
 
     @Expose()
     private startOnCreate: boolean;
@@ -42,8 +37,6 @@ export class Timer extends GameObject {
     @Exclude()
     private readonly saveProgress: boolean;
     @Exclude()
-    public readonly IgnoreGameSpeed: boolean;
-    @Exclude()
     private readonly baseStartOnCreate: boolean;
     @Exclude()
     private readonly baseRepeat: boolean;
@@ -52,7 +45,7 @@ export class Timer extends GameObject {
 
     constructor(engine: nerdEngine | null, id: string,
                 duration: RawFloat | Time, speed: RawFloat, startOnCreate: boolean, repeat: boolean,
-                onTimerEvent?: OnTimerEvent, saveProgress: boolean = true, ignoreGameSpeed: boolean = false)
+                onTimerEvent?: OnTimerEvent, saveProgress: boolean = true)
     {
         super(engine, ClassNames.Timer, id);
         if (duration instanceof Time) {
@@ -75,7 +68,6 @@ export class Timer extends GameObject {
         this.baseActive = this.active;
 
         this.saveProgress = saveProgress;
-        this.IgnoreGameSpeed = ignoreGameSpeed;
 
         if (this.startOnCreate) {
             this.Start();
@@ -184,8 +176,6 @@ export class Timer extends GameObject {
                 if (this.OnTimerEvent) {
                     this.OnTimerEvent(this);
                 }
-
-                this.Events.OnTimer.Trigger(this, {})
 
                 if (this.repeat) {
                     this.Start();

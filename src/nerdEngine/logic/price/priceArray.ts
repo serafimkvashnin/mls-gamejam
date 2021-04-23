@@ -1,4 +1,4 @@
-import { IPrice, Price } from "./price";
+import {Price} from "./price";
 import {Float, RawFloat} from "../../data";
 import {Type} from "class-transformer";
 import {Wallet} from "../wallet";
@@ -11,9 +11,9 @@ export class PriceArray {
     public readonly classID: string;
 
     @Type(() => Price)
-    private readonly prices: IPrice[];
+    private readonly prices: Price[];
 
-    constructor(prices: IPrice | IPrice[]) {
+    constructor(prices: Price | Price[]) {
         this.classID = this.constructor.name;
         this.prices = Array.isArray(prices) ? prices : [ prices ];
     }
@@ -24,7 +24,7 @@ export class PriceArray {
         }
     }
 
-    get Prices(): IPrice[] {
+    get Prices(): Price[] {
         return this.prices;
     }
 
@@ -54,21 +54,6 @@ export class PriceArray {
         }
 
         return outputWallets;
-    }
-
-    /**
-     * @return 0-100
-     */
-    BuyProgressOne() {
-        let max = new Float(0);
-        for (const price of this.prices) {
-            const value = price.BuyProgressOne();
-            if (value.IsMore(max)) {
-                max = value;
-            }
-        }
-
-        return max;
     }
 
     GetByWallet(wallet: Wallet) {
@@ -122,7 +107,7 @@ export class PriceArray {
         let spentTotal = new WalletValueArray([]);
 
         for (const price of this.prices) {
-            spentTotal.AddToArray(price.Buy(count));
+            spentTotal.Add(price.Buy(count));
         }
 
         return spentTotal;
