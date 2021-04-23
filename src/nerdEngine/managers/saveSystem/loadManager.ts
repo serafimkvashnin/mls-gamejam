@@ -45,7 +45,7 @@ export class LoadManager {
     //todo вообще не обязательно делать всё ридонли и передавать только через конструктор!
     public restartToLoadCallback?: (loadManger: LoadManager) => void;
 
-    public readonly ContentFixer: LoadedContentFixer;
+    public ContentFixer: LoadedContentFixer;
 
     private loadID: number = 0;
 
@@ -64,7 +64,7 @@ export class LoadManager {
      * @param customTypes
      * @param slotName SlotName is combined with Engine.GameName (TODO, option to do this maybe?)
      */
-    constructor(public readonly Engine: nerdEngine, contentFixer?: LoadedContentFixer)
+    constructor(public Engine: nerdEngine, contentFixer?: LoadedContentFixer)
     {
         this.ContentFixer = contentFixer ?? new LoadedContentFixer(Engine);
 
