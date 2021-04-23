@@ -2,10 +2,8 @@ const path = require("path");
 const HtmlWebPackPlugin = require('html-webpack-plugin');
 
 module.exports = {
-    //watch: true,
-    //devtool: "eval",
+    devtool: "eval",
     mode: "development",
-    //mode: 'production',
     entry: [
         "./src/app.ts"
     ],
