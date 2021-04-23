@@ -1,4 +1,5 @@
 import 'reflect-metadata';
+import Phaser from "phaser";
 import GameConfig = Phaser.Types.Core.GameConfig;
 import {LoaderScene} from "./game/scenes/LoaderScene";
 import { DataManager } from './nerdEngine/managers/dataManager';
@@ -6,6 +7,8 @@ import { SaveMaker } from './nerdEngine/managers/saveSystem/saveMaker';
 import { LoadManager } from './nerdEngine/managers/saveSystem/loadManager';
 import { LoadedContentFixer } from './nerdEngine/managers/saveSystem/loadedContentFixer';
 import { nerdEngine } from './nerdEngine';
+import { GameScene } from './game/scenes/GameScene';
+import { GameUIScene } from './game/scenes/ui/GameUIScene';
 
 export let NerdEngine: nerdEngine;
 export let PhaserEngine: GameEngine;
@@ -27,8 +30,8 @@ const config: Phaser.Types.Core.GameConfig = {
 
     scene: [
         LoaderScene,
-        // TestScene,
-        // TestSceneUI,
+        GameScene,
+        GameUIScene,
     ],
 
     backgroundColor: "#6495ed",
@@ -49,15 +52,13 @@ const config: Phaser.Types.Core.GameConfig = {
 
 export class GameEngine extends Phaser.Game {
 
-    //public readonly SceneSelector: SceneSelector;
     public readonly Random: Phaser.Math.RandomDataGenerator;
 
     constructor(config: GameConfig) {
         super(config);
 
-        //this.SceneSelector = new SceneSelector(this);
         this.Random = new Phaser.Math.RandomDataGenerator();
-        Phaser.Display.Canvas.Smoothing.disable(this.context); //note ни на что не влияет вообще))
+        //Phaser.Display.Canvas.Smoothing.disable(this.context); //note ни на что не влияет вообще))
         //Phaser.Display.Canvas.CanvasInterpolation.setCrisp(this.canvas); //note буквально тоже самое что pixelArt: true
     }
 }
@@ -107,8 +108,6 @@ window.addEventListener("load", () => {
 
     (<any>window).PhaserEngine = PhaserEngine;
     console.log(`[DevInfo] Use 'PhaserEngine' to access Phaser`);
-
-
 
     (<any>window).Nerd = NerdEngine;
     console.log(`[DevInfo] Use 'Nerd' to access nerdEngine`);

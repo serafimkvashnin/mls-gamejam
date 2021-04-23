@@ -4,8 +4,9 @@ import FilterMode = Phaser.Textures.FilterMode;
 import { SceneId } from "../registry/enums/SceneId";
 import { ResourceManager } from "../managers/ResourceManager";
 import { MusicId } from "../registry/enums/MusicId";
+import { IScene } from "./IScene";
 
-export class LoaderScene extends Phaser.Scene {
+export class LoaderScene extends Phaser.Scene implements IScene {
     constructor() {
         super({
             key: SceneId.LoaderScene,
@@ -15,21 +16,20 @@ export class LoaderScene extends Phaser.Scene {
     public ResourceManager!: ResourceManager;
 
     preload() {
-        this.cameras.main.setBackgroundColor("#000000")
+        this.cameras.main.setBackgroundColor("#000000");
         const progress = this.add.graphics();
 
         this.load.on('progress', (value: number) => {
             progress.clear();
             progress.fillStyle(Color.HexStringToColor("#ff3ce3").color, 1);
-            progress.fillRect(0, this.cameras.main.height/2, this.cameras.main.width * value, 100);
+            progress.fillRect(0, this.cameras.main.height / 2, this.cameras.main.width * value, 100);
         });
 
         this.load.on('complete', () => {
-            // NerdEngine.Events.OnContentLoaded.Register(() => {
-            //     PhaserEngine.SceneSelector.SwitchScene(this, SceneID.TestScene);
-            // })
+            NerdEngine.Events.OnContentLoaded.Register(() => {
+                this.scene.switch(SceneId.GameScene);
+            });
             NerdEngine.InitContent();
-            //PhaserEngine.scene.switch(this, SceneId.GameScene);
 
             this.load.textureManager.each(texture => {
                 texture.setFilter(FilterMode.NEAREST);
