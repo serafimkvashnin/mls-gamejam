@@ -1,6 +1,6 @@
-import {Resource} from "../resources/Resource";
 import { ValuesOf } from "../../nerdEngine/utils/utilsObjects";
-import { ResourceRegister } from "../registry/ResourceRegister";
+import { ResourceRegistry } from "../registry/ResourceRegistry";
+import { Resource } from "../resources/Resource";
 
 export class ResourceManager {
 
@@ -11,8 +11,7 @@ export class ResourceManager {
         this.Scene = scene;
         this.Resources = [];
 
-        this.AddToResourceList(ValuesOf(ResourceRegister.Textures));
-        this.AddToResourceList(ValuesOf(ResourceRegister.Sounds));
+        this.AddToResourceList(ValuesOf(ResourceRegistry.Textures));
     }
 
     private AddToResourceList(resource: Resource | Resource[]) {

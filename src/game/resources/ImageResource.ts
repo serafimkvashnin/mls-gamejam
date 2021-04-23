@@ -1,5 +1,6 @@
 import LoaderPlugin = Phaser.Loader.LoaderPlugin;
-import {Resource, TextureType} from "./Resource";
+import FilterMode = Phaser.Textures.FilterMode;
+import { Resource, TextureType } from "./Resource";
 
 export class ImageResource extends Resource {
     constructor(id: string, path: string) {

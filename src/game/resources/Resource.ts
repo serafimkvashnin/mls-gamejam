@@ -1,10 +1,15 @@
 import LoaderPlugin = Phaser.Loader.LoaderPlugin;
 
-export type ResourceType = TextureType;
+export type ResourceType = TextureType | SoundType;
 
 export enum TextureType {
     Image,
     SpriteSheet,
+}
+
+export enum SoundType {
+    Sound,
+    Music
 }
 
 export abstract class Resource {
