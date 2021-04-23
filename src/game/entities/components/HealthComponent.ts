@@ -1,14 +1,14 @@
 import { GameEvent, Time } from "../../../nerdEngine";
-import { Creature } from "../creatures/Creature";
 import { Entity } from "../Entity";
 import { SavebleComponent } from "./SaveableComponent";
+import { ICreature } from "../creatures/ICreature";
 
 export class HealthComponent extends SavebleComponent {
     public events = {
-        onHealthModified: new GameEvent<Creature, { from: Creature | Entity }>(),
-        onHealthIncreased: new GameEvent<Creature, { from: Creature | Entity }>(),
-        onHealthDecreased: new GameEvent<Creature, { from: Creature | Entity }>(),
-        onHealthEmpty: new GameEvent<Creature, { from: Creature | Entity }>(),
+        onHealthModified: new GameEvent<ICreature, { from: ICreature | Entity }>(),
+        onHealthIncreased: new GameEvent<ICreature, { from: ICreature | Entity }>(),
+        onHealthDecreased: new GameEvent<ICreature, { from: ICreature | Entity }>(),
+        onHealthEmpty: new GameEvent<ICreature, { from: ICreature | Entity }>(),
     }
 
     public unhittable: boolean = false;
@@ -36,7 +36,7 @@ export class HealthComponent extends SavebleComponent {
     }
 
     /** @return Did health modified or not */
-    public modifyHealth(amount: number, from: Creature | Entity, modifyMaxHealth: boolean = false): boolean {
+    public modifyHealth(amount: number, from: ICreature | Entity, modifyMaxHealth: boolean = false): boolean {
         if (this.health <= 0 || amount == 0 || amount < 0 && (this._invincibilityElapsedTimeMs > 0 || this.unhittable)) return false;
 
         this.setHealth(this.health + amount, from, modifyMaxHealth);
@@ -50,7 +50,7 @@ export class HealthComponent extends SavebleComponent {
     }
 
     /** Use this method to bypass all checks and to set health anyway */
-    public setHealth(amount: number, from: Creature | Entity, increaseMaxHealth: boolean = false) {
+    public setHealth(amount: number, from: ICreature | Entity, increaseMaxHealth: boolean = false) {
         if (amount <= 0) {
             this._health = 0;
             this.events.onHealthEmpty.Trigger(this.creature, { from });
@@ -71,7 +71,7 @@ export class HealthComponent extends SavebleComponent {
         return this._health;
     }
 
-    public setMaxHealth(amount: number, from: Creature | Entity) {
+    public setMaxHealth(amount: number, from: ICreature | Entity) {
         if (amount >= 0) {
             this._maxHealth = amount;
             this.setHealth(this.health, from);

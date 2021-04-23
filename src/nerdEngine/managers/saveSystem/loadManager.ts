@@ -1,16 +1,12 @@
-//todo actually i think it can be good better way to do it in actual save manager, like ISaveType with Load func, dunno..
-
-import { IGameLoadInfo, SlotGameLoadInfo, StringGameLoadInfo } from "./loadInfo";
-import { LoadedContentFixer } from "./index";
-import { GameEvent } from "../../components";
-import { ClassNames, Container, GameObject, IGameObject, Timer, Upgrade } from "../../logic";
 import { deserialize, Exclude, plainToClass } from "class-transformer";
-import { IsObject, ValuesOf } from "../../utils/utilsObjects";
-
-import { CurrentTimeStr } from "../../utils/utilsText";
+import { ClassNames, Container, GameObject, IGameObject, Timer, Upgrade } from "../../logic";
+import { IGameLoadInfo, SlotGameLoadInfo, StringGameLoadInfo } from "./loadInfo";
 import { nerdEngine } from "../../nerdEngine";
 import { SaveData } from "./saveManager";
-import { GetDateDifferenceTime } from "../../utils/utilsMath";
+import { IsObject, ValuesOf } from "../../utils/utilsObjects";
+import { LoadedContentFixer } from "./loadedContentFixer";
+import { GameEvent } from "../../components";
+import { CurrentTimeStr } from "../../utils/utilsText";
 
 export type LoadResult = {
     IsError: boolean,

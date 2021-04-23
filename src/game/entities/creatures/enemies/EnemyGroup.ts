@@ -1,10 +1,6 @@
-import { Scene } from "phaser";
-import { Entity } from "../../Entity";
 import { EntityGroup } from "../../EntityGroup";
-import { Creature } from "../Creature";
 import { Enemy } from "./Enemy";
 import { CreatureGroup } from "../CreatureGroup";
-import { HealthComponent } from "../../components/HealthComponent";
 import { GameScene } from "../../../scenes/GameScene";
 import { TextureId } from "../../../registry/enums/TextureId";
 

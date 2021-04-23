@@ -2,13 +2,12 @@ import { Entity } from "../Entity";
 import { HealthComponent } from "../components/HealthComponent";
 import Vector2 = Phaser.Math.Vector2;
 import { Component } from "../components/Component";
-import { Constants } from "../../utils/Constants";
 import { GameScene } from "../../scenes/GameScene";
 import { angleToVector2 } from "../../utils/helpers/MathHelper";
 import { ClassConstructor, GameEvent } from "../../../nerdEngine";
+import { ICreature } from "./ICreature";
 
-
-export abstract class Creature extends Phaser.Physics.Arcade.Sprite {
+export abstract class Creature extends Phaser.Physics.Arcade.Sprite implements ICreature {
     public readonly scene: GameScene;
 
     public events = {
@@ -17,7 +16,6 @@ export abstract class Creature extends Phaser.Physics.Arcade.Sprite {
     }
 
     public readonly health: HealthComponent;
-
 
     public readonly colliderRadius: number;
 

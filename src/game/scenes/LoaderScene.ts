@@ -1,9 +1,8 @@
-import { NerdEngine, PhaserEngine } from "../../app";
-import Color = Phaser.Display.Color;
-import FilterMode = Phaser.Textures.FilterMode;
 import { SceneId } from "../registry/enums/SceneId";
 import { ResourceManager } from "../managers/ResourceManager";
-import { MusicId } from "../registry/enums/MusicId";
+import Color = Phaser.Display.Color;
+import FilterMode = Phaser.Textures.FilterMode;
+//import { NerdEngine } from "../../engineSetup";
 
 export class LoaderScene extends Phaser.Scene {
     constructor() {
@@ -28,9 +27,10 @@ export class LoaderScene extends Phaser.Scene {
             // NerdEngine.Events.OnContentLoaded.Register(() => {
             //     PhaserEngine.SceneSelector.SwitchScene(this, SceneID.TestScene);
             // })
-            NerdEngine.InitContent();
+            //NerdEngine.InitContent();
             //PhaserEngine.scene.switch(this, SceneId.GameScene);
 
+            this.scene.manager.switch(this, SceneId.GameScene);
             this.load.textureManager.each(texture => {
                 texture.setFilter(FilterMode.NEAREST);
                 console.log(`sources: ${texture.source.length}, scale mode: ${texture.source[0].scaleMode}`);

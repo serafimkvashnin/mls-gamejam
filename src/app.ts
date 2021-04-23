@@ -1,15 +1,10 @@
 import 'reflect-metadata';
 import GameConfig = Phaser.Types.Core.GameConfig;
 import {LoaderScene} from "./game/scenes/LoaderScene";
-import { DataManager } from './nerdEngine/managers/dataManager';
-import { SaveMaker } from './nerdEngine/managers/saveSystem/saveMaker';
-import { LoadManager } from './nerdEngine/managers/saveSystem/loadManager';
-import { LoadedContentFixer } from './nerdEngine/managers/saveSystem/loadedContentFixer';
 // @ts-ignore
 import RexUIPlugin from 'phaser3-rex-plugins/templates/ui/ui-plugin.js';
-import { nerdEngine } from './nerdEngine';
+import { InitEngine } from "./engineSetup";
 
-export let NerdEngine: nerdEngine;
 export let PhaserEngine: GameEngine;
 //export let Game: GameManager;
 
@@ -74,56 +69,12 @@ export class GameEngine extends Phaser.Game {
     }
 }
 
-let loadManager: LoadManager;
-
-export function InitEngine() {
-    NerdEngine = new nerdEngine({
-        gameName: "DualForce Idle",
-        buildMode: "Preview",
-        saveMaker: (engine: nerdEngine) => new SaveMaker(engine), //todo хуйня какая-то если честно,
-        loadManager: (engine: nerdEngine, contentFixer?: LoadedContentFixer) => {
-            if (!loadManager) {
-                loadManager = new LoadManager(engine, contentFixer)
-            }
-            loadManager.Engine = engine;
-
-            if (contentFixer) {
-                loadManager.ContentFixer = contentFixer;
-            }
-
-            loadManager.Reset();
-            return loadManager;
-        },
-
-        fileSystem: new DataManager(),
-        platform: "None",
-
-        contentInitCallback: () => {
-
-        },
-        contentResetCallback: () => {
-            
-        },
-
-        customTypes: () => ({
-
-        }),
-    });
-
-    console.log(`Engine initiated`);
-}
-
 window.addEventListener("load", () => {
     PhaserEngine = new GameEngine(config);
     InitEngine();
 
     (<any>window).PhaserEngine = PhaserEngine;
     console.log(`[DevInfo] Use 'PhaserEngine' to access Phaser`);
-
-
-
-    (<any>window).Nerd = NerdEngine;
-    console.log(`[DevInfo] Use 'Nerd' to access nerdEngine`);
 
     console.log(`[DevInfo] Use 'Game' to access GameManager`);
 });

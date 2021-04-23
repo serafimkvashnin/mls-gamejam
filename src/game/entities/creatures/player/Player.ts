@@ -2,8 +2,6 @@ import { Creature } from "../Creature";
 import { GameEvent } from "../../../../nerdEngine/components";
 import Key = Phaser.Input.Keyboard.Key;
 import Vector2 = Phaser.Math.Vector2;
-import { Constants } from "../../../utils/Constants";
-import { RangeWeapon } from "../../weapons/range/RangeWeapon";
 import { GameScene } from "../../../scenes/GameScene";
 import { TextureId } from "../../../registry/enums/TextureId";
 

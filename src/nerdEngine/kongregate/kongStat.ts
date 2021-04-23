@@ -1,5 +1,6 @@
 //todo add position in rating and system to get position progress
-import {StatScope} from "./statistics";
+import { KongStatValue } from "./kongStatValue";
+import { StatScope } from "./statsScope";
 
 export class KongStat {
     private readonly id: string;
@@ -63,26 +64,5 @@ export class KongStat {
         for (const statValue of statValues) {
             this.AddValue(statValue, update);
         }
-    }
-}
-
-export class KongStatValue {
-    private readonly scope: StatScope;
-    private value: number;
-    constructor(scope: StatScope, value: number) {
-        this.scope = scope;
-        this.value = value;
-    }
-
-    get Scope(): StatScope {
-        return this.scope;
-    }
-
-    get Value(): number {
-        return this.value;
-    }
-
-    set Value(value: number) {
-        this.value = value;
     }
 }

@@ -1,10 +1,10 @@
 import { Entity } from "../Entity";
-import { ProjectileConfig } from "./ProjectileConfig";
 import { GameEvent } from "../../../nerdEngine/components";
 import { Creature } from "../creatures/Creature";
 import { GameScene } from "../../scenes/GameScene";
 import { TextureId } from "../../registry/enums/TextureId";
 import { LayerId } from "../../registry/enums/LayerId";
+import { ProjectileConfig } from "./ProjectileConfig";
 
 export abstract class Projectile extends Entity {
     public readonly onDeath: GameEvent<Projectile, { from: Creature | Entity }>;

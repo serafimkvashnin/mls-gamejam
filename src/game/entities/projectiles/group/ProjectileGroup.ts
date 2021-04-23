@@ -1,8 +1,9 @@
-import { BasicBullet, ProjectileConfig } from "../ProjectileConfig";
+import { BasicBullet } from "../ProjectileConfigExamples";
 import { Scene } from "phaser";
 import { Projectile } from "../Projectile";
 import { EntityGroup } from "../../EntityGroup";
 import { TextureId } from "../../../registry/enums/TextureId";
+import { ProjectileConfig } from "../ProjectileConfig";
 
 export class ProjectileGroup extends EntityGroup {
 

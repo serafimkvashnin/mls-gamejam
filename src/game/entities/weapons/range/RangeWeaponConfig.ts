@@ -1,5 +1,5 @@
-import { ProjectileConfig } from "../../projectiles/ProjectileConfig";
 import { WeaponConfig } from "../WeaponConfig";
+import { ProjectileConfig } from "../../projectiles/ProjectileConfig";
 
 export interface RangeWeaponConfig extends WeaponConfig {
     /** If the value is `0` then the gun could shoot all directions, if the value is `1` the gun has maximum accuracy. */
